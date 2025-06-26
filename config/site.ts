@@ -1,62 +1,38 @@
 export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
-  name: "Next.js + HeroUI",
-  description: "Make beautiful websites regardless of your design experience.",
+  name: "SEA Catering",
+  description: "Healthy Meals, Anytime, Anywhere",
   navItems: [
     {
       label: "Home",
       href: "/",
     },
     {
-      label: "Docs",
-      href: "/docs",
+      label: "Menu",
+      href: "/menu",
     },
     {
-      label: "Pricing",
-      href: "/pricing",
+      label: "Subscribe",
+      href: "/subscribe",
     },
     {
-      label: "Blog",
-      href: "/blog",
-    },
-    {
-      label: "About",
-      href: "/about",
+      label: "Contact Us",
+      href: "/contact",
     },
   ],
   navMenuItems: [
     {
-      label: "Profile",
-      href: "/profile",
+      label: "Menu",
+      href: "/menu",
     },
     {
-      label: "Dashboard",
-      href: "/dashboard",
+      label: "Subscribe",
+      href: "/subscribe",
     },
     {
-      label: "Projects",
-      href: "/projects",
-    },
-    {
-      label: "Team",
-      href: "/team",
-    },
-    {
-      label: "Calendar",
-      href: "/calendar",
-    },
-    {
-      label: "Settings",
-      href: "/settings",
-    },
-    {
-      label: "Help & Feedback",
-      href: "/help-feedback",
-    },
-    {
-      label: "Logout",
-      href: "/logout",
+      label: "Contact Us",
+      href: "/contact",
     },
   ],
   links: {
