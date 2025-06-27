@@ -1,5 +1,10 @@
 "use client";
 
+import { useState } from "react";
+import { usePathname } from "next/navigation";
+import NextLink from "next/link";
+import clsx from "clsx";
+
 import {
   Navbar as HeroUINavbar,
   NavbarContent,
@@ -12,12 +17,8 @@ import {
 import { Button } from "@heroui/button";
 import { Link } from "@heroui/link";
 import { link as linkStyles } from "@heroui/theme";
-import NextLink from "next/link";
-import { usePathname } from "next/navigation";
-import clsx from "clsx";
 
 import { siteConfig } from "@/config/site";
-import { useState } from "react";
 
 export const Navbar = () => {
   const pathname = usePathname();
@@ -29,10 +30,10 @@ export const Navbar = () => {
 
   return (
     <HeroUINavbar
-      maxWidth="xl"
-      position="sticky"
-      onMenuOpenChange={setIsMenuOpen}
       isMenuOpen={isMenuOpen}
+      maxWidth="xl"
+      onMenuOpenChange={setIsMenuOpen}
+      position="sticky"
     >
       <NavbarContent justify="start">
         <NavbarBrand as="li" className="gap-3 max-w-fit">
@@ -44,24 +45,23 @@ export const Navbar = () => {
 
       <NavbarContent className="hidden lg:flex" justify="center">
         <ul className="flex gap-4">
-          {siteConfig.navItems &&
-            siteConfig.navItems.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <NavbarItem key={item.href}>
-                  <NextLink
-                    className={clsx(
-                      linkStyles({ color: "foreground" }),
-                      "data-[active=true]:text-primary data-[active=true]:font-medium transition-colors",
-                      isActive && "text-primary font-medium"
-                    )}
-                    href={item.href}
-                  >
-                    {item.label}
-                  </NextLink>
-                </NavbarItem>
-              );
-            })}
+          {siteConfig.navItems?.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <NavbarItem key={item.href}>
+                <NextLink
+                  className={clsx(
+                    linkStyles({ color: "foreground" }),
+                    "data-[active=true]:text-primary data-[active=true]:font-medium transition-colors",
+                    isActive && "text-primary font-medium"
+                  )}
+                  href={item.href}
+                >
+                  {item.label}
+                </NextLink>
+              </NavbarItem>
+            );
+          })}
         </ul>
       </NavbarContent>
 
@@ -69,8 +69,8 @@ export const Navbar = () => {
         <NavbarItem className="hidden lg:flex">
           <Button
             as={NextLink}
-            color="primary"
             className="font-medium"
+            color="primary"
             href="/login"
             variant="solid"
           >
@@ -84,30 +84,30 @@ export const Navbar = () => {
       </NavbarContent>
 
       <NavbarMenu>
-        {siteConfig?.navItems?.map((item, index) => {
+        {siteConfig.navItems?.map((item) => {
           const isActive = pathname === item.href;
           return (
             <NavbarMenuItem key={item.href}>
               <Link
+                className={clsx("w-full", isActive && "font-semibold")}
                 color={isActive ? "primary" : "foreground"}
                 href={item.href}
-                size="lg"
-                className={clsx("w-full", isActive && "font-semibold")}
                 onClick={handleMenuItemClick}
+                size="lg"
               >
                 {item.label}
               </Link>
             </NavbarMenuItem>
           );
-        }) || []}
+        })}
         <NavbarMenuItem key="login-mobile">
           <Button
             as={Link}
-            color="primary"
             className="font-medium w-full mt-4"
+            color="primary"
             href="/login"
-            variant="solid"
             onClick={handleMenuItemClick}
+            variant="solid"
           >
             Login
           </Button>

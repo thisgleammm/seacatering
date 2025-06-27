@@ -14,6 +14,15 @@ import {
 } from "@heroui/modal";
 import { Avatar } from "@heroui/avatar";
 
+interface Testimonial {
+  id: number;
+  name: string;
+  message: string;
+  rating: number;
+  date: string;
+  plan?: string;
+}
+
 const initialTestimonials = [
   {
     id: 1,
@@ -71,15 +80,6 @@ const initialTestimonials = [
   },
 ];
 
-interface Testimonial {
-  id: number;
-  name: string;
-  message: string;
-  rating: number;
-  date: string;
-  plan?: string;
-}
-
 export const TestimonialsSection = () => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [testimonials, setTestimonials] =
@@ -89,10 +89,20 @@ export const TestimonialsSection = () => {
     name: "",
     message: "",
     rating: 5,
+    plan: "",
   });
 
   const [isPaused, setIsPaused] = useState(false);
   const testimonialsToShow = 3;
+
+  const plans = [
+    "Healthy Weight Loss Plan",
+    "Muscle Building Plan",
+    "Mediterranean Wellness",
+    "Keto Lifestyle Plan",
+    "Vegetarian Balance",
+    "Family Healthy Plan"
+  ];
 
   useEffect(() => {
     const slideTimer = setInterval(() => {
@@ -106,7 +116,7 @@ export const TestimonialsSection = () => {
     }, 3000);
 
     return () => clearInterval(slideTimer);
-  }, [isPaused, testimonials.length]);
+  }, [isPaused, testimonials.length, testimonialsToShow]);
 
   const handleSubmit = (onClose: () => void) => {
     if (!formData.name.trim() || !formData.message.trim()) {
@@ -120,10 +130,11 @@ export const TestimonialsSection = () => {
       message: formData.message,
       rating: formData.rating,
       date: new Date().toISOString().split("T")[0],
+      plan: formData.plan,
     };
 
     setTestimonials([newTestimonial, ...testimonials]);
-    setFormData({ name: "", message: "", rating: 5 });
+    setFormData({ name: "", message: "", rating: 5, plan: "" });
     onClose();
   };
 
@@ -139,10 +150,6 @@ export const TestimonialsSection = () => {
     ));
   };
 
-  const getVisibleTestimonials = () => {
-    return testimonials.slice(currentIndex, currentIndex + testimonialsToShow);
-  };
-
   return (
     <section className="py-16 bg-white">
       <div className="container mx-auto px-4">
@@ -155,10 +162,10 @@ export const TestimonialsSection = () => {
             transformed their health journey with SEA Catering meal plans.
           </p>
           <Button
-            color="primary"
-            variant="flat"
             className="text-red-800 font-semibold"
+            color="primary"
             onPress={onOpen}
+            variant="flat"
           >
             Share Your Experience
           </Button>
@@ -178,8 +185,8 @@ export const TestimonialsSection = () => {
                 <CardHeader className="pb-3 pt-2 px-3">
                   <div className="flex items-center gap-3">
                     <Avatar
-                      name={testimonials[currentIndex].name}
                       className="bg-[#8C0909] text-white w-10 h-10 text-base"
+                      name={testimonials[currentIndex].name}
                     />
                     <div className="flex flex-col">
                       <p className="font-semibold text-foreground text-base">
@@ -198,7 +205,7 @@ export const TestimonialsSection = () => {
                 </CardHeader>
                 <CardBody className="px-3 pt-1 pb-3">
                   <p className="text-sm text-default-600 leading-relaxed">
-                    "{testimonials[currentIndex].message}"
+                    &ldquo;{testimonials[currentIndex].message}&rdquo;
                   </p>
                   {testimonials[currentIndex].plan && (
                     <div className="mt-3 pt-3 border-t border-divider">
@@ -249,8 +256,8 @@ export const TestimonialsSection = () => {
                     <CardHeader className="pb-4 pt-3 px-4">
                       <div className="flex items-center gap-4">
                         <Avatar
-                          name={testimonial.name}
                           className="bg-[#8C0909] text-white w-12 h-12 text-lg"
+                          name={testimonial.name}
                         />
                         <div className="flex flex-col">
                           <p className="font-semibold text-foreground text-lg">
@@ -269,7 +276,7 @@ export const TestimonialsSection = () => {
                     </CardHeader>
                     <CardBody className="px-4 pt-2 pb-4">
                       <p className="text-base text-default-600 leading-relaxed">
-                        "{testimonial.message}"
+                        &ldquo;{testimonial.message}&rdquo;
                       </p>
                       {testimonial.plan && (
                         <div className="mt-4 pt-4 border-t border-divider">
@@ -318,28 +325,56 @@ export const TestimonialsSection = () => {
                 <ModalBody>
                   <div className="space-y-4">
                     <Input
+                      isRequired
                       label="Your Name"
-                      placeholder="Enter your full name"
-                      value={formData.name}
                       onChange={(e) =>
                         setFormData({ ...formData, name: e.target.value })
                       }
-                      isRequired
+                      placeholder="Enter your full name"
+                      value={formData.name}
                     />
 
                     <Textarea
+                      isRequired
                       label="Your Review"
-                      placeholder="Share your experience with our meal plans..."
-                      value={formData.message}
+                      minRows={4}
                       onChange={(e) =>
                         setFormData({ ...formData, message: e.target.value })
                       }
-                      minRows={4}
-                      isRequired
+                      placeholder="Share your experience with our meal plans..."
+                      value={formData.message}
                     />
 
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-foreground">
+                      <label
+                        className="text-sm font-medium text-foreground"
+                        htmlFor="plan"
+                      >
+                        Select Plan
+                      </label>
+                      <select
+                        id="plan"
+                        className="w-full px-3 py-2 rounded-lg bg-default-100 border-2 border-default-200 focus:border-primary focus:outline-none"
+                        value={formData.plan}
+                        onChange={(e) =>
+                          setFormData({ ...formData, plan: e.target.value })
+                        }
+                        required
+                      >
+                        <option value="">Choose a meal plan</option>
+                        {plans.map((plan) => (
+                          <option key={plan} value={plan}>
+                            {plan}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label
+                        className="text-sm font-medium text-foreground"
+                        htmlFor="rating"
+                      >
                         Rating
                       </label>
                       <div className="flex gap-1">
@@ -367,16 +402,16 @@ export const TestimonialsSection = () => {
                   </div>
                 </ModalBody>
                 <ModalFooter>
-                  <Button color="danger" variant="light" onPress={onClose}>
+                  <Button color="danger" onPress={onClose} variant="light">
                     Cancel
                   </Button>
                   <Button
+                    className="bg-[#8C0909] text-white hover:bg-red-900"
                     color="primary"
-                    onPress={() => handleSubmit(onClose)}
                     isDisabled={
                       !formData.name.trim() || !formData.message.trim()
                     }
-                    className="bg-[#8C0909] text-white hover:bg-red-900"
+                    onPress={() => handleSubmit(onClose)}
                   >
                     Submit Review
                   </Button>
