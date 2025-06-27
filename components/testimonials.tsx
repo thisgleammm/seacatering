@@ -14,7 +14,6 @@ import {
 } from "@heroui/modal";
 import { Avatar } from "@heroui/avatar";
 
-// Mock testimonials data
 const initialTestimonials = [
   {
     id: 1,
@@ -111,31 +110,29 @@ export const TestimonialsSection = () => {
 
   const handleSubmit = (onClose: () => void) => {
     if (!formData.name.trim() || !formData.message.trim()) {
-      // You might want to add more robust validation/feedback here
       alert("Please fill in your name and review message.");
       return;
     }
 
     const newTestimonial: Testimonial = {
-      id: Date.now(), // Unique ID for the new testimonial
+      id: Date.now(),
       name: formData.name,
       message: formData.message,
       rating: formData.rating,
-      date: new Date().toISOString().split("T")[0], // Current date in YYYY-MM-DD format
+      date: new Date().toISOString().split("T")[0],
     };
 
-    setTestimonials([newTestimonial, ...testimonials]); // Add new testimonial to the beginning
-    setFormData({ name: "", message: "", rating: 5 }); // Reset form
-    onClose(); // Close the modal
+    setTestimonials([newTestimonial, ...testimonials]);
+    setFormData({ name: "", message: "", rating: 5 });
+    onClose();
   };
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, index) => (
       <button
         key={index}
-        type="button" // Important for buttons inside forms
+        type="button"
         className={index < rating ? "text-yellow-400" : "text-gray-300"}
-        // No onClick here as it's for display in cards, not the form
       >
         ★
       </button>
@@ -149,12 +146,11 @@ export const TestimonialsSection = () => {
   return (
     <section className="py-16 bg-white">
       <div className="container mx-auto px-4">
-        {/* Header */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
             What Our Customers Say
           </h2>
-          <p className="text-lg text-default-600 max-w-2xl mx-auto mb-8">
+          <p className="text-base md:text-lg text-default-600 max-w-2xl mx-auto mb-8">
             Read authentic reviews from our satisfied customers who have
             transformed their health journey with SEA Catering meal plans.
           </p>
@@ -168,85 +164,147 @@ export const TestimonialsSection = () => {
           </Button>
         </div>
 
-        {/* Testimonials Carousel */}
         <div
-          className="relative max-w-6xl mx-auto overflow-hidden"
+          className="relative max-w-6xl mx-auto"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
-          <div
-            className="flex transition-transform duration-500 ease-in-out"
-            style={{
-              transform: `translateX(-${currentIndex * (100 / testimonialsToShow)}%)`,
-            }}
-          >
-            {testimonials.map((testimonial) => (
-              <div
-                key={testimonial.id}
-                className="w-full md:w-1/2 lg:w-1/3 flex-shrink-0 px-3 py-2"
+          <div className="md:hidden">
+            <div className="w-full px-2">
+              <Card
+                className="h-full transition-all duration-700 ease-in-out bg-white hover:bg-white hover:shadow-lg"
+                style={{ backgroundColor: "white" }}
               >
-                <Card
-                  className="h-full transition-all duration-700 ease-in-out bg-white hover:bg-white hover:shadow-lg"
-                  style={{ backgroundColor: "white" }}
-                >
-                  <CardHeader className="pb-4 pt-3 px-4">
-                    <div className="flex items-center gap-4">
-                      <Avatar
-                        name={testimonial.name}
-                        className="bg-[#8C0909] text-white w-12 h-12 text-lg"
-                      />
-                      <div className="flex flex-col">
-                        <p className="font-semibold text-foreground text-lg">
-                          {testimonial.name}
-                        </p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <div className="flex text-sm">
-                            {renderStars(testimonial.rating)}
-                          </div>
-                          <span className="text-small text-default-500">
-                            {testimonial.date}
-                          </span>
+                <CardHeader className="pb-3 pt-2 px-3">
+                  <div className="flex items-center gap-3">
+                    <Avatar
+                      name={testimonials[currentIndex].name}
+                      className="bg-[#8C0909] text-white w-10 h-10 text-base"
+                    />
+                    <div className="flex flex-col">
+                      <p className="font-semibold text-foreground text-base">
+                        {testimonials[currentIndex].name}
+                      </p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <div className="flex text-xs">
+                          {renderStars(testimonials[currentIndex].rating)}
                         </div>
+                        <span className="text-xs text-default-500">
+                          {testimonials[currentIndex].date}
+                        </span>
                       </div>
                     </div>
-                  </CardHeader>
-                  <CardBody className="px-4 pt-2 pb-4">
-                    <p className="text-default-600 leading-relaxed">
-                      "{testimonial.message}"
-                    </p>
-                    {testimonial.plan && (
-                      <div className="mt-4 pt-4 border-t border-divider">
-                        <p className="text-small text-[#8C0909] font-medium">
-                          Plan: {testimonial.plan}
-                        </p>
-                      </div>
-                    )}
-                  </CardBody>
-                </Card>
+                  </div>
+                </CardHeader>
+                <CardBody className="px-3 pt-1 pb-3">
+                  <p className="text-sm text-default-600 leading-relaxed">
+                    "{testimonials[currentIndex].message}"
+                  </p>
+                  {testimonials[currentIndex].plan && (
+                    <div className="mt-3 pt-3 border-t border-divider">
+                      <p className="text-xs text-[#8C0909] font-medium">
+                        Plan: {testimonials[currentIndex].plan}
+                      </p>
+                    </div>
+                  )}
+                </CardBody>
+              </Card>
+            </div>
+            <div className="flex justify-center mt-6">
+              <div className="flex gap-1.5">
+                {Array.from(
+                  { length: testimonials.length - testimonialsToShow + 1 },
+                  (_, index) => (
+                    <button
+                      key={index}
+                      className={`w-1.5 h-1.5 rounded-full transition-colors ${
+                        currentIndex === index
+                          ? "bg-[#8C0909]"
+                          : "bg-default-300"
+                      }`}
+                      onClick={() => setCurrentIndex(index)}
+                    />
+                  )
+                )}
               </div>
-            ))}
+            </div>
           </div>
 
-          {/* Pagination Dots */}
-          <div className="flex justify-center mt-8">
-            <div className="flex gap-2">
-              {Array.from(
-                { length: testimonials.length - testimonialsToShow + 1 },
-                (_, index) => (
-                  <button
-                    key={index}
-                    className={`w-2 h-2 rounded-full transition-colors ${
-                      currentIndex === index ? "bg-[#8C0909]" : "bg-default-300"
-                    }`}
-                    onClick={() => setCurrentIndex(index)}
-                  />
-                )
-              )}
+          <div className="hidden md:block overflow-hidden">
+            <div
+              className="flex transition-transform duration-500 ease-in-out"
+              style={{
+                transform: `translateX(-${currentIndex * (100 / testimonialsToShow)}%)`,
+              }}
+            >
+              {testimonials.map((testimonial) => (
+                <div
+                  key={testimonial.id}
+                  className="w-1/2 lg:w-1/3 flex-shrink-0 px-3 py-2"
+                >
+                  <Card
+                    className="h-full transition-all duration-700 ease-in-out bg-white hover:bg-white hover:shadow-lg"
+                    style={{ backgroundColor: "white" }}
+                  >
+                    <CardHeader className="pb-4 pt-3 px-4">
+                      <div className="flex items-center gap-4">
+                        <Avatar
+                          name={testimonial.name}
+                          className="bg-[#8C0909] text-white w-12 h-12 text-lg"
+                        />
+                        <div className="flex flex-col">
+                          <p className="font-semibold text-foreground text-lg">
+                            {testimonial.name}
+                          </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <div className="flex text-sm">
+                              {renderStars(testimonial.rating)}
+                            </div>
+                            <span className="text-small text-default-500">
+                              {testimonial.date}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardBody className="px-4 pt-2 pb-4">
+                      <p className="text-base text-default-600 leading-relaxed">
+                        "{testimonial.message}"
+                      </p>
+                      {testimonial.plan && (
+                        <div className="mt-4 pt-4 border-t border-divider">
+                          <p className="text-small text-[#8C0909] font-medium">
+                            Plan: {testimonial.plan}
+                          </p>
+                        </div>
+                      )}
+                    </CardBody>
+                  </Card>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-center mt-8">
+              <div className="flex gap-2">
+                {Array.from(
+                  { length: testimonials.length - testimonialsToShow + 1 },
+                  (_, index) => (
+                    <button
+                      key={index}
+                      className={`w-2 h-2 rounded-full transition-colors ${
+                        currentIndex === index
+                          ? "bg-[#8C0909]"
+                          : "bg-default-300"
+                      }`}
+                      onClick={() => setCurrentIndex(index)}
+                    />
+                  )
+                )}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Submit Testimonial Modal */}
         <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="lg">
           <ModalContent>
             {(onClose) => (

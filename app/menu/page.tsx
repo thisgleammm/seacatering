@@ -19,9 +19,9 @@ const mealPlans = [
   {
     id: 1,
     name: "Healthy Weight Loss Plan",
-    price: "Rp 850,000",
-    pricePerDay: "Rp 85,000/day",
-    duration: "10 days",
+    price: "Rp85,000",
+    pricePerDay: "Rp85,000/day",
+    duration: "1 day",
     description:
       "A carefully crafted meal plan designed to help you lose weight while maintaining proper nutrition and energy levels.",
     image:
@@ -47,9 +47,9 @@ const mealPlans = [
   {
     id: 2,
     name: "Muscle Building Plan",
-    price: "Rp 1,200,000",
-    pricePerDay: "Rp 120,000/day",
-    duration: "10 days",
+    price: "Rp120,000",
+    pricePerDay: "Rp120,000/day",
+    duration: "1 day",
     description:
       "High-protein meal plan perfect for athletes and fitness enthusiasts looking to build lean muscle mass.",
     image:
@@ -75,9 +75,9 @@ const mealPlans = [
   {
     id: 3,
     name: "Mediterranean Wellness",
-    price: "Rp 950,000",
-    pricePerDay: "Rp 95,000/day",
-    duration: "10 days",
+    price: "Rp95,000",
+    pricePerDay: "Rp95,000/day",
+    duration: "1 day",
     description:
       "Inspired by Mediterranean diet principles, focusing on heart-healthy ingredients and balanced nutrition.",
     image:
@@ -103,9 +103,9 @@ const mealPlans = [
   {
     id: 4,
     name: "Keto Lifestyle Plan",
-    price: "Rp 1,100,000",
-    pricePerDay: "Rp 110,000/day",
-    duration: "10 days",
+    price: "Rp110,000",
+    pricePerDay: "Rp110,000/day",
+    duration: "1 day",
     description:
       "Low-carb, high-fat ketogenic meal plan designed to help your body enter and maintain ketosis.",
     image:
@@ -131,9 +131,9 @@ const mealPlans = [
   {
     id: 5,
     name: "Vegetarian Balance",
-    price: "Rp 750,000",
-    pricePerDay: "Rp 75,000/day",
-    duration: "10 days",
+    price: "Rp75,000",
+    pricePerDay: "Rp75,000/day",
+    duration: "1 day",
     description:
       "Plant-based meal plan providing complete nutrition through diverse vegetarian ingredients and protein sources.",
     image:
@@ -159,9 +159,9 @@ const mealPlans = [
   {
     id: 6,
     name: "Family Healthy Plan",
-    price: "Rp 1,500,000",
-    pricePerDay: "Rp 150,000/day",
-    duration: "10 days",
+    price: "Rp150,000",
+    pricePerDay: "Rp150,000/day",
+    duration: "1 day",
     description:
       "Family-sized portions of healthy, balanced meals suitable for all family members including children.",
     image:
@@ -236,8 +236,8 @@ export default function Menu() {
             key={plan.id}
             className="hover:shadow-lg transition-shadow duration-300 h-full flex flex-col"
           >
-            <CardHeader className="flex flex-col items-start p-0">
-              <div className="relative w-full h-48 overflow-hidden">
+            <CardHeader className="flex flex-col gap-1">
+              <div className="relative w-full h-48 overflow-hidden rounded-t-xl rounded-b-none">
                 <Image
                   alt={plan.name}
                   className="w-full h-full object-cover object-center"
@@ -269,17 +269,11 @@ export default function Menu() {
                 <div className="flex justify-between items-center">
                   <div>
                     <p className="text-2xl font-bold text-primary">
-                      {plan.price}
+                      {plan.price}/day
                     </p>
-                    <p className="text-small text-default-500">
-                      {plan.pricePerDay}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-small font-medium">{plan.duration}</p>
-                    <p className="text-small text-default-500">
+                    <span className="text-small text-default-400 block">
                       {plan.calories}
-                    </p>
+                    </span>
                   </div>
                 </div>
 
@@ -289,11 +283,6 @@ export default function Menu() {
                       {meal}
                     </Chip>
                   ))}
-                  {plan.meals.length > 3 && (
-                    <Chip size="sm" variant="bordered">
-                      +{plan.meals.length - 3} more
-                    </Chip>
-                  )}
                 </div>
 
                 <Button

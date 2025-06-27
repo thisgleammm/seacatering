@@ -23,11 +23,16 @@ export const Navbar = () => {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const handleMenuItemClick = () => {
+    setIsMenuOpen(false);
+  };
+
   return (
     <HeroUINavbar
       maxWidth="xl"
       position="sticky"
       onMenuOpenChange={setIsMenuOpen}
+      isMenuOpen={isMenuOpen}
     >
       <NavbarContent justify="start">
         <NavbarBrand as="li" className="gap-3 max-w-fit">
@@ -72,10 +77,10 @@ export const Navbar = () => {
             Login
           </Button>
         </NavbarItem>
-          <NavbarMenuToggle
-            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-            className="sm:hidden"
-          />
+        <NavbarMenuToggle
+          aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+          className="sm:hidden"
+        />
       </NavbarContent>
 
       <NavbarMenu>
@@ -88,6 +93,7 @@ export const Navbar = () => {
                 href={item.href}
                 size="lg"
                 className={clsx("w-full", isActive && "font-semibold")}
+                onClick={handleMenuItemClick}
               >
                 {item.label}
               </Link>
@@ -101,6 +107,7 @@ export const Navbar = () => {
             className="font-medium w-full mt-4"
             href="/login"
             variant="solid"
+            onClick={handleMenuItemClick}
           >
             Login
           </Button>
