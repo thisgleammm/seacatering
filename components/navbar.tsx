@@ -17,12 +17,18 @@ import { usePathname } from "next/navigation";
 import clsx from "clsx";
 
 import { siteConfig } from "@/config/site";
+import { useState } from "react";
 
 export const Navbar = () => {
   const pathname = usePathname();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   return (
-    <HeroUINavbar maxWidth="xl" position="sticky">
+    <HeroUINavbar
+      maxWidth="xl"
+      position="sticky"
+      onMenuOpenChange={setIsMenuOpen}
+    >
       <NavbarContent justify="start">
         <NavbarBrand as="li" className="gap-3 max-w-fit">
           <NextLink className="flex justify-start items-center gap-1" href="/">
@@ -33,31 +39,31 @@ export const Navbar = () => {
 
       <NavbarContent className="hidden lg:flex" justify="center">
         <ul className="flex gap-4">
-          {siteConfig.navItems.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <NavbarItem key={item.href}>
-                <NextLink
-                  className={clsx(
-                    linkStyles({ color: "foreground" }),
-                    "data-[active=true]:text-primary data-[active=true]:font-medium transition-colors",
-                    isActive && "text-primary font-medium"
-                  )}
-                  color="foreground"
-                  href={item.href}
-                >
-                  {item.label}
-                </NextLink>
-              </NavbarItem>
-            );
-          })}
+          {siteConfig.navItems &&
+            siteConfig.navItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <NavbarItem key={item.href}>
+                  <NextLink
+                    className={clsx(
+                      linkStyles({ color: "foreground" }),
+                      "data-[active=true]:text-primary data-[active=true]:font-medium transition-colors",
+                      isActive && "text-primary font-medium"
+                    )}
+                    href={item.href}
+                  >
+                    {item.label}
+                  </NextLink>
+                </NavbarItem>
+              );
+            })}
         </ul>
       </NavbarContent>
 
       <NavbarContent justify="end">
         <NavbarItem className="hidden lg:flex">
           <Button
-            as={Link}
+            as={NextLink}
             color="primary"
             className="font-medium"
             href="/login"
@@ -66,13 +72,14 @@ export const Navbar = () => {
             Login
           </Button>
         </NavbarItem>
-        <NavbarItem className="lg:hidden">
-          <NavbarMenuToggle />
-        </NavbarItem>
+          <NavbarMenuToggle
+            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+            className="sm:hidden"
+          />
       </NavbarContent>
 
       <NavbarMenu>
-        {siteConfig.navItems.map((item, index) => {
+        {siteConfig?.navItems?.map((item, index) => {
           const isActive = pathname === item.href;
           return (
             <NavbarMenuItem key={item.href}>
@@ -80,17 +87,14 @@ export const Navbar = () => {
                 color={isActive ? "primary" : "foreground"}
                 href={item.href}
                 size="lg"
-                className={clsx(
-                  "w-full transition-colors",
-                  isActive && "font-semibold"
-                )}
+                className={clsx("w-full", isActive && "font-semibold")}
               >
                 {item.label}
               </Link>
             </NavbarMenuItem>
           );
-        })}
-        <NavbarMenuItem key="login">
+        }) || []}
+        <NavbarMenuItem key="login-mobile">
           <Button
             as={Link}
             color="primary"

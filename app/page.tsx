@@ -3,6 +3,7 @@ import { Card, CardBody } from "@heroui/card";
 import { Link } from "@heroui/link";
 
 import { siteConfig } from "@/config/site";
+import { TestimonialsSection } from "../components/testimonials";
 
 export default function Home() {
   return (
@@ -110,6 +111,7 @@ export default function Home() {
           </Card>
         </div>
       </div>
+      <TestimonialsSection />
     </section>
   );
 }

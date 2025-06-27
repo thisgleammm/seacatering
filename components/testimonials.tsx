@@ -1,0 +1,333 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { Card, CardBody, CardHeader } from "@heroui/card";
+import { Button } from "@heroui/button";
+import { Input, Textarea } from "@heroui/input";
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+} from "@heroui/modal";
+import { Avatar } from "@heroui/avatar";
+
+// Mock testimonials data
+const initialTestimonials = [
+  {
+    id: 1,
+    name: "Sarah Johnson",
+    message:
+      "SEA Catering has completely transformed my eating habits! The Weight Loss Plan was perfect for my goals. Fresh, delicious meals delivered right to my door. I've lost 8kg in 2 months!",
+    rating: 5,
+    date: "2024-01-15",
+    plan: "Weight Loss Plan",
+  },
+  {
+    id: 2,
+    name: "Michael Chen",
+    message:
+      "As a busy professional, SEA Catering has been a lifesaver. The Muscle Building Plan provides exactly what I need for my workout routine. High-quality proteins and perfectly balanced nutrition.",
+    rating: 5,
+    date: "2024-01-10",
+    plan: "Muscle Building Plan",
+  },
+  {
+    id: 3,
+    name: "Amanda Rodriguez",
+    message:
+      "The Mediterranean Wellness plan is absolutely amazing! Every meal feels like a restaurant-quality dish. My family loves the flavors and I feel so much healthier. Highly recommended!",
+    rating: 4,
+    date: "2024-01-08",
+    plan: "Mediterranean Wellness",
+  },
+  {
+    id: 4,
+    name: "David Kim",
+    message:
+      "Excellent service and fantastic food quality. The Keto Lifestyle Plan helped me achieve my health goals faster than I expected. The customer service team is also very responsive.",
+    rating: 5,
+    date: "2024-01-05",
+    plan: "Keto Lifestyle Plan",
+  },
+  {
+    id: 5,
+    name: "Lisa Thompson",
+    message:
+      "Love the variety in the Vegetarian Balance plan! Each meal is thoughtfully prepared with fresh ingredients. It's convenient, healthy, and delicious. Perfect for my busy lifestyle.",
+    rating: 4,
+    date: "2024-01-02",
+    plan: "Vegetarian Balance",
+  },
+  {
+    id: 6,
+    name: "Robert Green",
+    message:
+      "Finally, a meal service that understands gluten-free needs. The Gluten-Free plan is delicious and safe. No more worrying about cross-contamination!",
+    rating: 5,
+    date: "2024-01-01",
+    plan: "Gluten-Free Plan",
+  },
+];
+
+interface Testimonial {
+  id: number;
+  name: string;
+  message: string;
+  rating: number;
+  date: string;
+  plan?: string;
+}
+
+export const TestimonialsSection = () => {
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [testimonials, setTestimonials] =
+    useState<Testimonial[]>(initialTestimonials);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [formData, setFormData] = useState({
+    name: "",
+    message: "",
+    rating: 5,
+  });
+
+  const [isPaused, setIsPaused] = useState(false);
+  const testimonialsToShow = 3;
+
+  useEffect(() => {
+    const slideTimer = setInterval(() => {
+      if (!isPaused) {
+        setCurrentIndex((prevIndex) =>
+          prevIndex === testimonials.length - testimonialsToShow
+            ? 0
+            : prevIndex + 1
+        );
+      }
+    }, 3000);
+
+    return () => clearInterval(slideTimer);
+  }, [isPaused, testimonials.length]);
+
+  const handleSubmit = (onClose: () => void) => {
+    if (!formData.name.trim() || !formData.message.trim()) {
+      // You might want to add more robust validation/feedback here
+      alert("Please fill in your name and review message.");
+      return;
+    }
+
+    const newTestimonial: Testimonial = {
+      id: Date.now(), // Unique ID for the new testimonial
+      name: formData.name,
+      message: formData.message,
+      rating: formData.rating,
+      date: new Date().toISOString().split("T")[0], // Current date in YYYY-MM-DD format
+    };
+
+    setTestimonials([newTestimonial, ...testimonials]); // Add new testimonial to the beginning
+    setFormData({ name: "", message: "", rating: 5 }); // Reset form
+    onClose(); // Close the modal
+  };
+
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }, (_, index) => (
+      <button
+        key={index}
+        type="button" // Important for buttons inside forms
+        className={index < rating ? "text-yellow-400" : "text-gray-300"}
+        // No onClick here as it's for display in cards, not the form
+      >
+        ★
+      </button>
+    ));
+  };
+
+  const getVisibleTestimonials = () => {
+    return testimonials.slice(currentIndex, currentIndex + testimonialsToShow);
+  };
+
+  return (
+    <section className="py-16 bg-white">
+      <div className="container mx-auto px-4">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+            What Our Customers Say
+          </h2>
+          <p className="text-lg text-default-600 max-w-2xl mx-auto mb-8">
+            Read authentic reviews from our satisfied customers who have
+            transformed their health journey with SEA Catering meal plans.
+          </p>
+          <Button
+            color="primary"
+            variant="flat"
+            className="text-red-800 font-semibold"
+            onPress={onOpen}
+          >
+            Share Your Experience
+          </Button>
+        </div>
+
+        {/* Testimonials Carousel */}
+        <div
+          className="relative max-w-6xl mx-auto overflow-hidden"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
+          <div
+            className="flex transition-transform duration-500 ease-in-out"
+            style={{
+              transform: `translateX(-${currentIndex * (100 / testimonialsToShow)}%)`,
+            }}
+          >
+            {testimonials.map((testimonial) => (
+              <div
+                key={testimonial.id}
+                className="w-full md:w-1/2 lg:w-1/3 flex-shrink-0 px-3 py-2"
+              >
+                <Card
+                  className="h-full transition-all duration-700 ease-in-out bg-white hover:bg-white hover:shadow-lg"
+                  style={{ backgroundColor: "white" }}
+                >
+                  <CardHeader className="pb-4 pt-3 px-4">
+                    <div className="flex items-center gap-4">
+                      <Avatar
+                        name={testimonial.name}
+                        className="bg-[#8C0909] text-white w-12 h-12 text-lg"
+                      />
+                      <div className="flex flex-col">
+                        <p className="font-semibold text-foreground text-lg">
+                          {testimonial.name}
+                        </p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <div className="flex text-sm">
+                            {renderStars(testimonial.rating)}
+                          </div>
+                          <span className="text-small text-default-500">
+                            {testimonial.date}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardBody className="px-4 pt-2 pb-4">
+                    <p className="text-default-600 leading-relaxed">
+                      "{testimonial.message}"
+                    </p>
+                    {testimonial.plan && (
+                      <div className="mt-4 pt-4 border-t border-divider">
+                        <p className="text-small text-[#8C0909] font-medium">
+                          Plan: {testimonial.plan}
+                        </p>
+                      </div>
+                    )}
+                  </CardBody>
+                </Card>
+              </div>
+            ))}
+          </div>
+
+          {/* Pagination Dots */}
+          <div className="flex justify-center mt-8">
+            <div className="flex gap-2">
+              {Array.from(
+                { length: testimonials.length - testimonialsToShow + 1 },
+                (_, index) => (
+                  <button
+                    key={index}
+                    className={`w-2 h-2 rounded-full transition-colors ${
+                      currentIndex === index ? "bg-[#8C0909]" : "bg-default-300"
+                    }`}
+                    onClick={() => setCurrentIndex(index)}
+                  />
+                )
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Submit Testimonial Modal */}
+        <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="lg">
+          <ModalContent>
+            {(onClose) => (
+              <>
+                <ModalHeader className="flex flex-col gap-1">
+                  <h3 className="text-2xl font-bold">Share Your Experience</h3>
+                  <p className="text-default-600 font-normal">
+                    Tell others about your journey with SEA Catering
+                  </p>
+                </ModalHeader>
+                <ModalBody>
+                  <div className="space-y-4">
+                    <Input
+                      label="Your Name"
+                      placeholder="Enter your full name"
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                      isRequired
+                    />
+
+                    <Textarea
+                      label="Your Review"
+                      placeholder="Share your experience with our meal plans..."
+                      value={formData.message}
+                      onChange={(e) =>
+                        setFormData({ ...formData, message: e.target.value })
+                      }
+                      minRows={4}
+                      isRequired
+                    />
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-foreground">
+                        Rating
+                      </label>
+                      <div className="flex gap-1">
+                        {Array.from({ length: 5 }, (_, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            className={`text-2xl transition-colors ${
+                              index < formData.rating
+                                ? "text-yellow-400 hover:text-yellow-500"
+                                : "text-gray-300 hover:text-yellow-400"
+                            }`}
+                            onClick={() =>
+                              setFormData({ ...formData, rating: index + 1 })
+                            }
+                          >
+                            ★
+                          </button>
+                        ))}
+                        <span className="ml-2 text-small text-default-600">
+                          {formData.rating} out of 5 stars
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </ModalBody>
+                <ModalFooter>
+                  <Button color="danger" variant="light" onPress={onClose}>
+                    Cancel
+                  </Button>
+                  <Button
+                    color="primary"
+                    onPress={() => handleSubmit(onClose)}
+                    isDisabled={
+                      !formData.name.trim() || !formData.message.trim()
+                    }
+                    className="bg-[#8C0909] text-white hover:bg-red-900"
+                  >
+                    Submit Review
+                  </Button>
+                </ModalFooter>
+              </>
+            )}
+          </ModalContent>
+        </Modal>
+      </div>
+    </section>
+  );
+};
