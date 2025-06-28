@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import { Input, Textarea } from "@heroui/input";
+import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
-import { Image } from "@heroui/image";
-import { Chip } from "@heroui/chip";
+import { Input, Textarea } from "@heroui/input";
+import Image from "next/image";
+
+import { PlanSkeletonGrid } from "@/components/plan-skeleton";
 
 interface FormData {
   name: string;
@@ -16,74 +17,17 @@ interface FormData {
   allergies: string;
 }
 
-const PLANS = [
-  {
-    id: "weight-loss",
-    name: "Healthy Weight Loss Plan",
-    price: 85000,
-    description:
-      "A carefully crafted meal plan designed to help you lose weight while maintaining proper nutrition and energy levels.",
-    image:
-      "https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    category: "Weight Loss",
-    calories: "1,200-1,400 kcal/day",
-  },
-  {
-    id: "muscle-gain",
-    name: "Muscle Building Plan",
-    price: 120000,
-    description:
-      "High-protein meal plan perfect for athletes and fitness enthusiasts looking to build lean muscle mass.",
-    image:
-      "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    category: "Muscle Gain",
-    calories: "2,200-2,500 kcal/day",
-  },
-  {
-    id: "mediterranean",
-    name: "Mediterranean Wellness",
-    price: 95000,
-    description:
-      "Inspired by Mediterranean diet principles, focusing on heart-healthy ingredients and balanced nutrition.",
-    image:
-      "https://images.unsplash.com/photo-1547592180-85f173990554?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    category: "Wellness",
-    calories: "1,600-1,800 kcal/day",
-  },
-  {
-    id: "keto",
-    name: "Keto Lifestyle Plan",
-    price: 110000,
-    description:
-      "Low-carb, high-fat ketogenic meal plan designed to help your body enter and maintain ketosis.",
-    image:
-      "https://images.unsplash.com/photo-1551782450-a2132b4ba21d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    category: "Keto",
-    calories: "1,500-1,700 kcal/day",
-  },
-  {
-    id: "vegetarian",
-    name: "Vegetarian Balance",
-    price: 75000,
-    description:
-      "Plant-based meal plan providing complete nutrition through diverse vegetarian ingredients and protein sources.",
-    image:
-      "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    category: "Vegetarian",
-    calories: "1,400-1,600 kcal/day",
-  },
-  {
-    id: "family",
-    name: "Family Healthy Plan",
-    price: 150000,
-    description:
-      "Family-sized portions of healthy, balanced meals suitable for all family members including children.",
-    image:
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-    category: "Family",
-    calories: "Varies by family size",
-  },
-];
+interface MealPlan {
+  id: string;
+  name: string;
+  price: number;
+  description: string;
+  calories: number;
+  duration: string;
+  features: string[];
+  category?: string;
+  image?: string;
+}
 
 const MEAL_TYPES = [
   { id: "breakfast", name: "Breakfast", icon: "🌅" },
@@ -101,24 +45,35 @@ const DAYS = [
   { id: "sunday", name: "Sunday" },
 ];
 
-const getCategoryColor = (category: string) => {
-  const colors: {
-    [key: string]:
-      | "success"
-      | "primary"
-      | "secondary"
-      | "warning"
-      | "danger"
-      | "default";
-  } = {
-    "Weight Loss": "success",
-    "Muscle Gain": "danger",
-    Wellness: "secondary",
-    Keto: "warning",
-    Vegetarian: "success",
-    Family: "danger",
+const getCategoryFromName = (name: string): string => {
+  if (name.includes("Weight Loss")) return "Weight Loss";
+  if (name.includes("Muscle")) return "Muscle Gain";
+  if (name.includes("Mediterranean")) return "Wellness";
+  if (name.includes("Keto")) return "Keto";
+  if (name.includes("Vegetarian")) return "Vegetarian";
+  if (name.includes("Family")) return "Family";
+
+  return "Other";
+};
+
+const getImageFromName = (name: string): string => {
+  const images: { [key: string]: string } = {
+    "Weight Loss":
+      "https://images.unsplash.com/photo-1490645935967-10de6ba17061?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    "Muscle Gain":
+      "https://images.unsplash.com/photo-1587996597484-04743eeb56b4?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    Wellness:
+      "https://images.unsplash.com/photo-1547592180-85f173990554?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    Keto: "https://images.unsplash.com/photo-1551782450-a2132b4ba21d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    Vegetarian:
+      "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+    Family:
+      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
   };
-  return colors[category] || "default";
+
+  const category = getCategoryFromName(name);
+
+  return images[category] || images["Wellness"];
 };
 
 export default function SubscribePage() {
@@ -131,10 +86,33 @@ export default function SubscribePage() {
     allergies: "",
   });
 
+  const [plans, setPlans] = useState<MealPlan[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [totalPrice, setTotalPrice] = useState(0);
   const [errors, setErrors] = useState<Partial<FormData>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  useEffect(() => {
+    setIsLoading(true);
+    fetch("/api/meal-plans")
+      .then((res) => res.json())
+      .then((data) => {
+        const enhancedData = data.map((plan: MealPlan) => ({
+          ...plan,
+          category: getCategoryFromName(plan.name),
+          image: getImageFromName(plan.name),
+        }));
+
+        setPlans(enhancedData);
+      })
+      .catch(() => {
+        setErrors((prev) => ({ ...prev, api: "Failed to load meal plans" }));
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []);
 
   useEffect(() => {
     if (
@@ -142,17 +120,18 @@ export default function SubscribePage() {
       formData.mealTypes.length > 0 &&
       formData.deliveryDays.length > 0
     ) {
-      const planPrice = PLANS.find((p) => p.id === formData.plan)?.price || 0;
+      const planPrice = plans.find((p) => p.id === formData.plan)?.price || 0;
       const total =
         planPrice *
         formData.mealTypes.length *
         formData.deliveryDays.length *
         4.3;
+
       setTotalPrice(total);
     } else {
       setTotalPrice(0);
     }
-  }, [formData.plan, formData.mealTypes, formData.deliveryDays]);
+  }, [formData.plan, formData.mealTypes, formData.deliveryDays, plans]);
 
   const validateForm = () => {
     const newErrors: Partial<FormData> = {};
@@ -179,6 +158,7 @@ export default function SubscribePage() {
     }
 
     setErrors(newErrors);
+
     return Object.keys(newErrors).length === 0;
   };
 
@@ -190,10 +170,7 @@ export default function SubscribePage() {
       try {
         await new Promise((resolve) => setTimeout(resolve, 2000));
         setIsSuccess(true);
-        console.log("Form submitted:", formData);
-        console.log("Total Price:", totalPrice);
-      } catch (error) {
-        console.error("Error submitting form:", error);
+      } catch {
       } finally {
         setIsSubmitting(false);
       }
@@ -250,89 +227,92 @@ export default function SubscribePage() {
 
         <Card className="w-full">
           <CardBody>
-            <form onSubmit={handleSubmit} className="space-y-8">
+            <form className="space-y-8" onSubmit={handleSubmit}>
               <div className="space-y-4">
-                <h3 className="text-xl font-semibold">
-                  Personal Information *
-                </h3>
-                <Input
-                  label="Full Name"
-                  placeholder="Enter your full name"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  isInvalid={!!errors.name}
-                  errorMessage={errors.name}
-                  isRequired
-                />
-                <Input
-                  label="Active Phone Number"
-                  placeholder="Enter your phone number"
-                  value={formData.phone}
-                  type="number"
-                  onChange={(e) =>
-                    setFormData({ ...formData, phone: e.target.value })
-                  }
-                  isInvalid={!!errors.phone}
-                  errorMessage={errors.phone}
-                  isRequired
-                />
+                <h3 className="text-xl font-semibold">Personal Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Input
+                    isRequired
+                    id="name"
+                    label="Full Name"
+                    name="name"
+                    placeholder="Enter your full name"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, name: e.target.value }))
+                    }
+                  />
+                  <Input
+                    isRequired
+                    id="phone"
+                    label="Phone Number"
+                    name="phone"
+                    placeholder="Enter your phone number"
+                    type="number"
+                    value={formData.phone}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        phone: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+                {(errors.name || errors.phone) && (
+                  <div className="text-danger text-sm">
+                    {errors.name && <p>{errors.name}</p>}
+                    {errors.phone && <p>{errors.phone}</p>}
+                  </div>
+                )}
               </div>
 
               <div className="space-y-4">
-                <h3 className="text-xl font-semibold">Select Your Plan *</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {PLANS.map((plan) => (
-                    <Card
-                      key={plan.id}
-                      isPressable
-                      isHoverable
-                      className={`cursor-pointer transition-all ${
-                        formData.plan === plan.id
-                          ? "border-primary border-2 bg-primary/10"
-                          : "border hover:border-primary"
-                      }`}
-                      onPress={() =>
-                        setFormData({ ...formData, plan: plan.id })
-                      }
-                    >
-                      <CardHeader className="flex flex-col gap-1">
-                        <div className="relative w-full h-48 overflow-hidden rounded-t-xl rounded-b-none">
-                          <Image
-                            alt={plan.name}
-                            className="w-full h-full object-cover"
-                            src={plan.image}
-                            removeWrapper
-                          />
-                          <div className="absolute top-2 right-2">
-                            <Chip
-                              color={getCategoryColor(plan.category)}
-                              variant="flat"
-                              size="sm"
-                            >
-                              {plan.category}
-                            </Chip>
+                <h3 className="text-xl font-semibold">Choose Your Plan *</h3>
+                {isLoading ? (
+                  <PlanSkeletonGrid />
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {plans.map((plan) => (
+                      <Card
+                        key={plan.id}
+                        isPressable
+                        className={`border-2 transition-all duration-200 ${
+                          formData.plan === plan.id
+                            ? "border-primary"
+                            : "border-default-200"
+                        }`}
+                        onPress={() =>
+                          setFormData({ ...formData, plan: plan.id })
+                        }
+                      >
+                        <CardBody className="p-0">
+                          <div className="relative w-full pt-[65%]">
+                            <Image
+                              alt={plan.name}
+                              className="absolute top-0 left-0 w-full h-full object-cover rounded-t-xl"
+                              src={plan.image || "/images/placeholder-meal.jpg"}
+                            />
                           </div>
-                        </div>
-                      </CardHeader>
-                      <CardBody className="p-4">
-                        <h4
-                          className={`font-semibold mb-1 ${
-                            formData.plan === plan.id ? "text-primary" : ""
-                          }`}
-                        >
-                          {plan.name}
-                        </h4>
-                        <div className="flex justify-between items-center">
-                          <p className="text-lg font-bold text-primary">
-                            Rp{plan.price.toLocaleString()}
-                          </p>
-                        </div>
-                      </CardBody>
-                    </Card>
-                  ))}
-                </div>
+                          <div className="p-4">
+                            <div className="flex justify-between items-start mb-2">
+                              <h4 className="text-lg font-semibold text-foreground">
+                                {plan.name}
+                              </h4>
+                              <div className="text-right">
+                                <p className="text-lg font-bold text-primary">
+                                  Rp{plan.price.toLocaleString("id-ID")}
+                                </p>
+                                <p className="text-sm text-default-400">
+                                  per meal
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </CardBody>
+                      </Card>
+                    ))}
+                  </div>
+                )}
                 {errors.plan && (
                   <p className="text-danger text-sm">{errors.plan}</p>
                 )}
@@ -340,12 +320,12 @@ export default function SubscribePage() {
 
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold">Meal Types *</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {MEAL_TYPES.map((type) => (
                     <Card
                       key={type.id}
-                      isPressable
                       isHoverable
+                      isPressable
                       className={`cursor-pointer transition-all ${
                         formData.mealTypes.includes(type.id)
                           ? "border-primary border-2 bg-primary/10"
@@ -360,8 +340,8 @@ export default function SubscribePage() {
                         });
                       }}
                     >
-                      <CardBody className="text-center p-4">
-                        <div className="text-3xl mb-2">{type.icon}</div>
+                      <CardBody className="text-center p-3">
+                        <div className="text-2xl mb-2">{type.icon}</div>
                         <h4
                           className={`font-medium ${
                             formData.mealTypes.includes(type.id)
@@ -386,8 +366,8 @@ export default function SubscribePage() {
                   {DAYS.map((day) => (
                     <Card
                       key={day.id}
-                      isPressable
                       isHoverable
+                      isPressable
                       className={`cursor-pointer transition-all ${
                         formData.deliveryDays.includes(day.id)
                           ? "border-primary border-2 bg-primary/10"
@@ -404,7 +384,11 @@ export default function SubscribePage() {
                     >
                       <CardBody className="text-center p-3">
                         <h4
-                          className={`font-medium ${formData.deliveryDays.includes(day.id) ? "text-primary" : ""}`}
+                          className={`font-medium ${
+                            formData.deliveryDays.includes(day.id)
+                              ? "text-primary"
+                              : ""
+                          }`}
                         >
                           {day.name}
                         </h4>
@@ -422,8 +406,8 @@ export default function SubscribePage() {
                   Additional Information
                 </h3>
                 <Textarea
-                  label="Allergies or Dietary Restrictions"
-                  placeholder="List any allergies or dietary restrictions..."
+                  label="Allergies or Special Requests"
+                  placeholder="Please let us know if you have any allergies or special dietary requirements"
                   value={formData.allergies}
                   onChange={(e) =>
                     setFormData({ ...formData, allergies: e.target.value })
@@ -431,51 +415,29 @@ export default function SubscribePage() {
                 />
               </div>
 
-              {totalPrice > 0 && (
-                <Card className="bg-default-50">
-                  <CardBody>
-                    <h3 className="text-xl font-semibold mb-4">
-                      Price Summary
-                    </h3>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span>Selected Plan:</span>
-                        <span>
-                          {PLANS.find((p) => p.id === formData.plan)?.name}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Meal Types:</span>
-                        <span>{formData.mealTypes.length} types</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Delivery Days:</span>
-                        <span>{formData.deliveryDays.length} days</span>
-                      </div>
-                      <div className="border-t pt-2 mt-2">
-                        <div className="flex justify-between font-semibold">
-                          <span>Total Monthly Price:</span>
-                          <span>Rp{totalPrice.toLocaleString()}</span>
-                        </div>
-                        <p className="text-sm text-default-600 mt-1">
-                          Based on 4.3 weeks per month
-                        </p>
-                      </div>
-                    </div>
-                  </CardBody>
-                </Card>
-              )}
-
-              <Button
-                type="submit"
-                color="primary"
-                className="w-full bg-[#8C0909] text-white"
-                size="lg"
-                isLoading={isSubmitting}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "Processing..." : "Subscribe Now"}
-              </Button>
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 border-t">
+                <div>
+                  <p className="text-2xl font-bold text-primary">
+                    {new Intl.NumberFormat("id-ID", {
+                      style: "currency",
+                      currency: "IDR",
+                      minimumFractionDigits: 0,
+                    }).format(totalPrice)}
+                  </p>
+                  <p className="text-small text-default-500">
+                    Monthly estimate (30 days)
+                  </p>
+                </div>
+                <Button
+                  color="primary"
+                  isDisabled={isSubmitting}
+                  isLoading={isSubmitting}
+                  size="lg"
+                  type="submit"
+                >
+                  Subscribe Now
+                </Button>
+              </div>
             </form>
           </CardBody>
         </Card>
