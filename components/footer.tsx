@@ -5,11 +5,11 @@ import { siteConfig } from "@/config/site";
 export const Footer = () => {
   return (
     <footer className="w-full bg-gray-50 dark:bg-gray-900 border-t border-divider mt-auto">
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="mx-auto max-w-7xl px-6 py-12">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-4">
             <h3 className="text-lg font-bold text-foreground">SEA Catering</h3>
-            <p className="text-sm text-default-600 leading-relaxed">
+            <p className="text-sm leading-relaxed text-default-600">
               Healthy meal service with delivery across Indonesia. Healthy
               Meals, Anytime, Anywhere.
             </p>
@@ -21,8 +21,8 @@ export const Footer = () => {
               {siteConfig.navItems.map((item) => (
                 <li key={item.href}>
                   <Link
+                    className="text-sm text-default-600 transition-colors hover:text-primary"
                     href={item.href}
-                    className="text-sm text-default-600 hover:text-primary transition-colors"
                   >
                     {item.label}
                   </Link>
@@ -41,15 +41,15 @@ export const Footer = () => {
                 <div className="text-sm">
                   <p className="text-default-600">
                     Manager:{" "}
-                    <span className="text-foreground font-medium">Brian</span>
+                    <span className="font-medium text-foreground">Brian</span>
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-sm">📱</span>
                 <Link
+                  className="text-sm text-primary transition-colors hover:text-primary-600"
                   href="tel:08123456789"
-                  className="text-sm text-primary hover:text-primary-600 transition-colors"
                 >
                   08123456789
                 </Link>
@@ -68,8 +68,8 @@ export const Footer = () => {
           </div>
         </div>
 
-        <div className="mt-8 pt-8 border-t border-divider">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="mt-8 border-t border-divider pt-8">
+          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             <p className="text-sm text-default-600">
               © {new Date().getFullYear()} SEA Catering. All rights reserved.
             </p>

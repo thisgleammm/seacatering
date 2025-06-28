@@ -15,102 +15,74 @@ import {
 import { Avatar } from "@heroui/avatar";
 
 interface Testimonial {
-  id: number;
-  name: string;
+  id: string;
+  user: {
+    name: string;
+  };
+  mealPlan: {
+    name: string;
+  };
   message: string;
   rating: number;
   date: string;
-  plan?: string;
 }
 
-const initialTestimonials = [
-  {
-    id: 1,
-    name: "Sarah Johnson",
-    message:
-      "SEA Catering has completely transformed my eating habits! The Weight Loss Plan was perfect for my goals. Fresh, delicious meals delivered right to my door. I've lost 8kg in 2 months!",
-    rating: 5,
-    date: "2024-01-15",
-    plan: "Weight Loss Plan",
-  },
-  {
-    id: 2,
-    name: "Michael Chen",
-    message:
-      "As a busy professional, SEA Catering has been a lifesaver. The Muscle Building Plan provides exactly what I need for my workout routine. High-quality proteins and perfectly balanced nutrition.",
-    rating: 5,
-    date: "2024-01-10",
-    plan: "Muscle Building Plan",
-  },
-  {
-    id: 3,
-    name: "Amanda Rodriguez",
-    message:
-      "The Mediterranean Wellness plan is absolutely amazing! Every meal feels like a restaurant-quality dish. My family loves the flavors and I feel so much healthier. Highly recommended!",
-    rating: 4,
-    date: "2024-01-08",
-    plan: "Mediterranean Wellness",
-  },
-  {
-    id: 4,
-    name: "David Kim",
-    message:
-      "Excellent service and fantastic food quality. The Keto Lifestyle Plan helped me achieve my health goals faster than I expected. The customer service team is also very responsive.",
-    rating: 5,
-    date: "2024-01-05",
-    plan: "Keto Lifestyle Plan",
-  },
-  {
-    id: 5,
-    name: "Lisa Thompson",
-    message:
-      "Love the variety in the Vegetarian Balance plan! Each meal is thoughtfully prepared with fresh ingredients. It's convenient, healthy, and delicious. Perfect for my busy lifestyle.",
-    rating: 4,
-    date: "2024-01-02",
-    plan: "Vegetarian Balance",
-  },
-  {
-    id: 6,
-    name: "Robert Green",
-    message:
-      "Finally, a meal service that understands gluten-free needs. The Gluten-Free plan is delicious and safe. No more worrying about cross-contamination!",
-    rating: 5,
-    date: "2024-01-01",
-    plan: "Gluten-Free Plan",
-  },
-];
+interface FormData {
+  name: string;
+  message: string;
+  rating: number;
+  plan: string;
+}
 
 export const TestimonialsSection = () => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const [testimonials, setTestimonials] =
-    useState<Testimonial[]>(initialTestimonials);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [formData, setFormData] = useState({
+  const [error, setError] = useState<string | null>(null);
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     message: "",
     rating: 5,
     plan: "",
   });
-
+  const [plans, setPlans] = useState<{ id: string; name: string }[]>([]);
   const [isPaused, setIsPaused] = useState(false);
   const testimonialsToShow = 3;
 
-  const plans = [
-    "Healthy Weight Loss Plan",
-    "Muscle Building Plan",
-    "Mediterranean Wellness",
-    "Keto Lifestyle Plan",
-    "Vegetarian Balance",
-    "Family Healthy Plan"
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [testimonialsRes, plansRes] = await Promise.all([
+          fetch("/api/testimonials"),
+          fetch("/api/meal-plans"),
+        ]);
+
+        if (!testimonialsRes.ok || !plansRes.ok) {
+          throw new Error("Failed to fetch data");
+        }
+
+        const [testimonialsData, plansData] = await Promise.all([
+          testimonialsRes.json(),
+          plansRes.json(),
+        ]);
+
+        setTestimonials(testimonialsData);
+        setPlans(plansData);
+      } catch {
+        setError("Failed to load testimonials. Please try again later.");
+      }
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const slideTimer = setInterval(() => {
-      if (!isPaused) {
+      if (!isPaused && testimonials.length > 0) {
         setCurrentIndex((prevIndex) =>
           prevIndex === testimonials.length - testimonialsToShow
             ? 0
-            : prevIndex + 1
+            : prevIndex + 1,
         );
       }
     }, 3000);
@@ -118,37 +90,52 @@ export const TestimonialsSection = () => {
     return () => clearInterval(slideTimer);
   }, [isPaused, testimonials.length, testimonialsToShow]);
 
-  const handleSubmit = (onClose: () => void) => {
-    if (!formData.name.trim() || !formData.message.trim()) {
-      alert("Please fill in your name and review message.");
-      return;
+  const handleSubmit = async (onClose: () => void) => {
+    try {
+      if (!formData.name.trim() || !formData.message.trim() || !formData.plan) {
+        setError("Please fill in all required fields.");
+
+        return;
+      }
+
+      const response = await fetch("/api/testimonials", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to submit testimonial");
+      }
+
+      const newTestimonial = await response.json();
+
+      setTestimonials([newTestimonial, ...testimonials]);
+      setFormData({ name: "", message: "", rating: 5, plan: "" });
+      setError(null);
+      onClose();
+    } catch {
+      setError("Failed to submit testimonial. Please try again.");
     }
-
-    const newTestimonial: Testimonial = {
-      id: Date.now(),
-      name: formData.name,
-      message: formData.message,
-      rating: formData.rating,
-      date: new Date().toISOString().split("T")[0],
-      plan: formData.plan,
-    };
-
-    setTestimonials([newTestimonial, ...testimonials]);
-    setFormData({ name: "", message: "", rating: 5, plan: "" });
-    onClose();
   };
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, index) => (
       <button
         key={index}
-        type="button"
         className={index < rating ? "text-yellow-400" : "text-gray-300"}
+        type="button"
       >
         ★
       </button>
     ));
   };
+
+  if (testimonials.length === 0 && !error) {
+    return null;
+  }
 
   return (
     <section className="py-16 bg-white">
@@ -164,18 +151,151 @@ export const TestimonialsSection = () => {
           <Button
             className="text-red-800 font-semibold"
             color="primary"
-            onPress={onOpen}
             variant="flat"
+            onPress={onOpen}
           >
             Share Your Experience
           </Button>
         </div>
+
+        {error && <div className="text-danger text-center mb-8">{error}</div>}
 
         <div
           className="relative max-w-6xl mx-auto"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
+          <Modal
+            isOpen={isOpen}
+            scrollBehavior="inside"
+            size="lg"
+            onOpenChange={onOpenChange}
+          >
+            <ModalContent>
+              {(onClose) => (
+                <>
+                  <ModalHeader>Share Your Experience</ModalHeader>
+                  <ModalBody>
+                    <div className="space-y-4">
+                      <div>
+                        <label
+                          className="block text-sm font-medium mb-2"
+                          htmlFor="name"
+                        >
+                          Your Name
+                        </label>
+                        <Input
+                          isRequired
+                          id="name"
+                          name="name"
+                          placeholder="Enter your name"
+                          value={formData.name}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              name: e.target.value,
+                            }))
+                          }
+                        />
+                      </div>
+
+                      <div>
+                        <label
+                          className="block text-sm font-medium mb-2"
+                          htmlFor="plan"
+                        >
+                          Meal Plan
+                        </label>
+                        <select
+                          className="w-full rounded-lg border-default-200 focus:border-primary"
+                          id="plan"
+                          name="plan"
+                          value={formData.plan}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              plan: e.target.value,
+                            }))
+                          }
+                        >
+                          <option value="">Select a meal plan</option>
+                          {plans.map((plan) => (
+                            <option key={plan.id} value={plan.id}>
+                              {plan.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label
+                          className="block text-sm font-medium mb-2"
+                          htmlFor="rating"
+                        >
+                          Rating
+                        </label>
+                        <div className="flex gap-2">
+                          {Array.from({ length: 5 }, (_, index) => (
+                            <button
+                              key={index}
+                              className={
+                                index < formData.rating
+                                  ? "text-yellow-400 text-2xl"
+                                  : "text-gray-300 text-2xl"
+                              }
+                              type="button"
+                              onClick={() =>
+                                setFormData((prev) => ({
+                                  ...prev,
+                                  rating: index + 1,
+                                }))
+                              }
+                            >
+                              ★
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label
+                          className="block text-sm font-medium mb-2"
+                          htmlFor="message"
+                        >
+                          Your Message
+                        </label>
+                        <Textarea
+                          isRequired
+                          id="message"
+                          name="message"
+                          placeholder="Share your experience with our meal plan"
+                          value={formData.message}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              message: e.target.value,
+                            }))
+                          }
+                        />
+                      </div>
+                    </div>
+                  </ModalBody>
+                  <ModalFooter>
+                    <Button color="danger" variant="light" onPress={onClose}>
+                      Cancel
+                    </Button>
+                    <Button
+                      color="primary"
+                      onPress={() => handleSubmit(onClose)}
+                    >
+                      Submit
+                    </Button>
+                  </ModalFooter>
+                </>
+              )}
+            </ModalContent>
+          </Modal>
+
           <div className="md:hidden">
             <div className="w-full px-2">
               <Card
@@ -186,18 +306,20 @@ export const TestimonialsSection = () => {
                   <div className="flex items-center gap-3">
                     <Avatar
                       className="bg-[#8C0909] text-white w-10 h-10 text-base"
-                      name={testimonials[currentIndex].name}
+                      name={testimonials[currentIndex].user.name}
                     />
                     <div className="flex flex-col">
                       <p className="font-semibold text-foreground text-base">
-                        {testimonials[currentIndex].name}
+                        {testimonials[currentIndex].user.name}
                       </p>
                       <div className="flex items-center gap-2 mt-0.5">
                         <div className="flex text-xs">
                           {renderStars(testimonials[currentIndex].rating)}
                         </div>
                         <span className="text-xs text-default-500">
-                          {testimonials[currentIndex].date}
+                          {new Date(
+                            testimonials[currentIndex].date,
+                          ).toLocaleDateString()}
                         </span>
                       </div>
                     </div>
@@ -207,13 +329,11 @@ export const TestimonialsSection = () => {
                   <p className="text-sm text-default-600 leading-relaxed">
                     &ldquo;{testimonials[currentIndex].message}&rdquo;
                   </p>
-                  {testimonials[currentIndex].plan && (
-                    <div className="mt-3 pt-3 border-t border-divider">
-                      <p className="text-xs text-[#8C0909] font-medium">
-                        Plan: {testimonials[currentIndex].plan}
-                      </p>
-                    </div>
-                  )}
+                  <div className="mt-3 pt-3 border-t border-divider">
+                    <p className="text-xs text-[#8C0909] font-medium">
+                      Plan: {testimonials[currentIndex].mealPlan.name}
+                    </p>
+                  </div>
                 </CardBody>
               </Card>
             </div>
@@ -231,7 +351,7 @@ export const TestimonialsSection = () => {
                       }`}
                       onClick={() => setCurrentIndex(index)}
                     />
-                  )
+                  ),
                 )}
               </div>
             </div>
@@ -257,18 +377,18 @@ export const TestimonialsSection = () => {
                       <div className="flex items-center gap-4">
                         <Avatar
                           className="bg-[#8C0909] text-white w-12 h-12 text-lg"
-                          name={testimonial.name}
+                          name={testimonial.user.name}
                         />
                         <div className="flex flex-col">
                           <p className="font-semibold text-foreground text-lg">
-                            {testimonial.name}
+                            {testimonial.user.name}
                           </p>
                           <div className="flex items-center gap-2 mt-1">
                             <div className="flex text-sm">
                               {renderStars(testimonial.rating)}
                             </div>
                             <span className="text-small text-default-500">
-                              {testimonial.date}
+                              {new Date(testimonial.date).toLocaleDateString()}
                             </span>
                           </div>
                         </div>
@@ -278,13 +398,11 @@ export const TestimonialsSection = () => {
                       <p className="text-base text-default-600 leading-relaxed">
                         &ldquo;{testimonial.message}&rdquo;
                       </p>
-                      {testimonial.plan && (
-                        <div className="mt-4 pt-4 border-t border-divider">
-                          <p className="text-small text-[#8C0909] font-medium">
-                            Plan: {testimonial.plan}
-                          </p>
-                        </div>
-                      )}
+                      <div className="mt-4 pt-4 border-t border-divider">
+                        <p className="text-small text-[#8C0909] font-medium">
+                          Plan: {testimonial.mealPlan.name}
+                        </p>
+                      </div>
                     </CardBody>
                   </Card>
                 </div>
@@ -305,121 +423,12 @@ export const TestimonialsSection = () => {
                       }`}
                       onClick={() => setCurrentIndex(index)}
                     />
-                  )
+                  ),
                 )}
               </div>
             </div>
           </div>
         </div>
-
-        <Modal isOpen={isOpen} onOpenChange={onOpenChange} size="lg">
-          <ModalContent>
-            {(onClose) => (
-              <>
-                <ModalHeader className="flex flex-col gap-1">
-                  <h3 className="text-2xl font-bold">Share Your Experience</h3>
-                  <p className="text-default-600 font-normal">
-                    Tell others about your journey with SEA Catering
-                  </p>
-                </ModalHeader>
-                <ModalBody>
-                  <div className="space-y-4">
-                    <Input
-                      isRequired
-                      label="Your Name"
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
-                      placeholder="Enter your full name"
-                      value={formData.name}
-                    />
-
-                    <Textarea
-                      isRequired
-                      label="Your Review"
-                      minRows={4}
-                      onChange={(e) =>
-                        setFormData({ ...formData, message: e.target.value })
-                      }
-                      placeholder="Share your experience with our meal plans..."
-                      value={formData.message}
-                    />
-
-                    <div className="space-y-2">
-                      <label
-                        className="text-sm font-medium text-foreground"
-                        htmlFor="plan"
-                      >
-                        Select Plan
-                      </label>
-                      <select
-                        id="plan"
-                        className="w-full px-3 py-2 rounded-lg bg-default-100 border-2 border-default-200 focus:border-primary focus:outline-none"
-                        value={formData.plan}
-                        onChange={(e) =>
-                          setFormData({ ...formData, plan: e.target.value })
-                        }
-                        required
-                      >
-                        <option value="">Choose a meal plan</option>
-                        {plans.map((plan) => (
-                          <option key={plan} value={plan}>
-                            {plan}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label
-                        className="text-sm font-medium text-foreground"
-                        htmlFor="rating"
-                      >
-                        Rating
-                      </label>
-                      <div className="flex gap-1">
-                        {Array.from({ length: 5 }, (_, index) => (
-                          <button
-                            key={index}
-                            type="button"
-                            className={`text-2xl transition-colors ${
-                              index < formData.rating
-                                ? "text-yellow-400 hover:text-yellow-500"
-                                : "text-gray-300 hover:text-yellow-400"
-                            }`}
-                            onClick={() =>
-                              setFormData({ ...formData, rating: index + 1 })
-                            }
-                          >
-                            ★
-                          </button>
-                        ))}
-                        <span className="ml-2 text-small text-default-600">
-                          {formData.rating} out of 5 stars
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </ModalBody>
-                <ModalFooter>
-                  <Button color="danger" onPress={onClose} variant="light">
-                    Cancel
-                  </Button>
-                  <Button
-                    className="bg-[#8C0909] text-white hover:bg-red-900"
-                    color="primary"
-                    isDisabled={
-                      !formData.name.trim() || !formData.message.trim()
-                    }
-                    onPress={() => handleSubmit(onClose)}
-                  >
-                    Submit Review
-                  </Button>
-                </ModalFooter>
-              </>
-            )}
-          </ModalContent>
-        </Modal>
       </div>
     </section>
   );

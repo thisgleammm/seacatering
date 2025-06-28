@@ -51,3 +51,30 @@ export const subtitle = tv({
     fullWidth: true,
   },
 });
+
+export const skeleton = tv({
+  base: "animate-pulse rounded-lg bg-default-200",
+  variants: {
+    size: {
+      sm: "h-3",
+      md: "h-4",
+      lg: "h-6",
+    },
+  },
+  defaultVariants: {
+    size: "md",
+  },
+});
+
+export const planSkeleton = tv({
+  slots: {
+    wrapper:
+      "w-full h-[400px] rounded-lg border border-default-200 p-6 space-y-4",
+    image: "w-full h-40 rounded-lg bg-default-200 animate-pulse",
+    title: "w-3/4 h-6 bg-default-200 animate-pulse rounded-lg",
+    price: "w-1/2 h-5 bg-default-200 animate-pulse rounded-lg",
+    description: "w-full h-4 bg-default-200 animate-pulse rounded-lg",
+    features: "space-y-2",
+    feature: "w-full h-3 bg-default-200 animate-pulse rounded-lg",
+  },
+});

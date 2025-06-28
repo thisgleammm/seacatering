@@ -4,18 +4,17 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import NextLink from "next/link";
 import clsx from "clsx";
-
-import {
-  Navbar as HeroUINavbar,
-  NavbarContent,
-  NavbarMenu,
-  NavbarMenuToggle,
-  NavbarBrand,
-  NavbarItem,
-  NavbarMenuItem,
-} from "@heroui/navbar";
 import { Button } from "@heroui/button";
 import { Link } from "@heroui/link";
+import {
+  Navbar as HeroUINavbar,
+  NavbarBrand,
+  NavbarContent,
+  NavbarItem,
+  NavbarMenu,
+  NavbarMenuItem,
+  NavbarMenuToggle,
+} from "@heroui/navbar";
 import { link as linkStyles } from "@heroui/theme";
 
 import { siteConfig } from "@/config/site";
@@ -30,10 +29,11 @@ export const Navbar = () => {
 
   return (
     <HeroUINavbar
+      className="fixed top-0 inset-x-0 h-16 z-50 backdrop-blur-sm backdrop-saturate-150 bg-background/70 border-b border-divider"
       isMenuOpen={isMenuOpen}
       maxWidth="xl"
-      onMenuOpenChange={setIsMenuOpen}
       position="sticky"
+      onMenuOpenChange={setIsMenuOpen}
     >
       <NavbarContent justify="start">
         <NavbarBrand as="li" className="gap-3 max-w-fit">
@@ -47,13 +47,14 @@ export const Navbar = () => {
         <ul className="flex gap-4">
           {siteConfig.navItems?.map((item) => {
             const isActive = pathname === item.href;
+
             return (
               <NavbarItem key={item.href}>
                 <NextLink
                   className={clsx(
                     linkStyles({ color: "foreground" }),
                     "data-[active=true]:text-primary data-[active=true]:font-medium transition-colors",
-                    isActive && "text-primary font-medium"
+                    isActive && "text-primary font-medium",
                   )}
                   href={item.href}
                 >
@@ -86,14 +87,15 @@ export const Navbar = () => {
       <NavbarMenu>
         {siteConfig.navItems?.map((item) => {
           const isActive = pathname === item.href;
+
           return (
             <NavbarMenuItem key={item.href}>
               <Link
                 className={clsx("w-full", isActive && "font-semibold")}
                 color={isActive ? "primary" : "foreground"}
                 href={item.href}
-                onClick={handleMenuItemClick}
                 size="lg"
+                onClick={handleMenuItemClick}
               >
                 {item.label}
               </Link>
@@ -106,8 +108,8 @@ export const Navbar = () => {
             className="font-medium w-full mt-4"
             color="primary"
             href="/login"
-            onClick={handleMenuItemClick}
             variant="solid"
+            onClick={handleMenuItemClick}
           >
             Login
           </Button>
