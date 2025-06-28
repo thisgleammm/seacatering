@@ -108,7 +108,7 @@ export default function Menu() {
   };
 
   const getNutritionInfoFromName = (
-    name: string
+    name: string,
   ): { protein: string; carbs: string; fats: string } => {
     const info: {
       [key: string]: { protein: string; carbs: string; fats: string };

@@ -288,8 +288,10 @@ export default function SubscribePage() {
                         <CardBody className="p-0">
                           <div className="relative w-full pt-[65%]">
                             <Image
+                              fill
                               alt={plan.name}
                               className="absolute top-0 left-0 w-full h-full object-cover rounded-t-xl"
+                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                               src={plan.image || "/images/placeholder-meal.jpg"}
                             />
                           </div>
