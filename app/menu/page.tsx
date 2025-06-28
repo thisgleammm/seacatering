@@ -108,7 +108,7 @@ export default function Menu() {
   };
 
   const getNutritionInfoFromName = (
-    name: string,
+    name: string
   ): { protein: string; carbs: string; fats: string } => {
     const info: {
       [key: string]: { protein: string; carbs: string; fats: string };
@@ -260,76 +260,93 @@ export default function Menu() {
         {mealPlans.map((plan) => (
           <Card
             key={plan.id}
-            isPressable
             className="border border-default-200 hover:border-primary hover:shadow-lg transition-all duration-300"
-            onPress={() => handleSeeDetails(plan)}
           >
-            <CardBody className="overflow-visible p-0">
-              <div className="relative w-full h-[240px]">
-                <Image
-                  fill
-                  priority
-                  alt={`${plan.name} meal plan`}
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  src={plan.image || "/images/placeholder-meal.jpg"}
-                  style={{
-                    objectFit: "cover",
-                    objectPosition: "center",
-                  }}
-                />
-              </div>
-
-              <div className="p-6 space-y-4">
-                <div className="flex justify-between items-start">
-                  <div className="space-y-2">
-                    <h3 className="text-xl font-semibold text-foreground">
-                      {plan.name}
-                    </h3>
-                    <Chip
-                      className="text-sm"
-                      color={getCategoryColor(plan.category || "Other")}
-                      size="sm"
-                      variant="flat"
-                    >
-                      {plan.category}
-                    </Chip>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xl font-bold text-primary">
-                      Rp{plan.price.toLocaleString("id-ID")}
-                    </p>
-                    <p className="text-sm text-default-500">per day</p>
-                  </div>
+            <CardBody className="overflow-visible p-0 h-full">
+              <div className="flex flex-col h-full">
+                <div className="relative w-full h-[240px]">
+                  <Image
+                    fill
+                    priority
+                    alt={`${plan.name} meal plan`}
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    src={plan.image || "/images/placeholder-meal.jpg"}
+                    style={{
+                      objectFit: "cover",
+                      objectPosition: "center",
+                    }}
+                  />
                 </div>
 
-                <p className="text-default-600 mb-6 line-clamp-3 text-base">
-                  {plan.description}
-                </p>
+                <div className="flex flex-col flex-1 p-6">
+                  <div className="space-y-4 flex-1">
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-2">
+                        <h3 className="text-xl font-semibold text-foreground">
+                          {plan.name}
+                        </h3>
+                        <Chip
+                          className="text-sm"
+                          color={getCategoryColor(plan.category || "Other")}
+                          size="sm"
+                          variant="flat"
+                        >
+                          {plan.category}
+                        </Chip>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xl font-bold text-primary">
+                          Rp{plan.price.toLocaleString("id-ID")}
+                        </p>
+                        <p className="text-sm text-default-500">per day</p>
+                      </div>
+                    </div>
 
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">🔥</span>
-                    <p className="text-base font-medium">
-                      {plan.calories} calories/day
+                    <p className="text-default-600 line-clamp-3 text-base">
+                      {plan.description}
                     </p>
+
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">🔥</span>
+                        <p className="text-base font-medium">
+                          {plan.calories} calories/day
+                        </p>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {plan.meals?.slice(0, 2).map((meal, index) => (
+                          <Chip
+                            key={index}
+                            className="bg-default-100"
+                            size="sm"
+                            variant="flat"
+                          >
+                            {meal}
+                          </Chip>
+                        ))}
+                        {plan.meals && plan.meals.length > 2 && (
+                          <Chip
+                            className="bg-default-100"
+                            size="sm"
+                            variant="flat"
+                          >
+                            +{plan.meals.length - 2} more
+                          </Chip>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {plan.meals?.slice(0, 2).map((meal, index) => (
-                      <Chip
-                        key={index}
-                        className="bg-default-100"
-                        size="sm"
-                        variant="flat"
-                      >
-                        {meal}
-                      </Chip>
-                    ))}
-                    {plan.meals && plan.meals.length > 2 && (
-                      <Chip className="bg-default-100" size="sm" variant="flat">
-                        +{plan.meals.length - 2} more
-                      </Chip>
-                    )}
+
+                  <div className="pt-4 mt-auto">
+                    <Button
+                      className="w-full"
+                      color="primary"
+                      variant="solid"
+                      onPress={() => handleSeeDetails(plan)}
+                    >
+                      See More Details
+                    </Button>
                   </div>
                 </div>
               </div>
