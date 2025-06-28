@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  name          String
+  email         String        @unique
+  phone         String?
+  address       String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  subscriptions Subscription[]
+  testimonials  Testimonial[]
+}
+
+model MealPlan {
+  id           String         @id @default(cuid())
+  name         String
+  description  String
+  price        Float
+  calories     Int
+  duration     String        // e.g., "1 day", "30 days"
+  features     String[]      // Array of features/benefits
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  subscriptions Subscription[]
+  testimonials  Testimonial[]
+}
+
+model Subscription {
+  id              String    @id @default(cuid())
+  userId          String
+  mealPlanId      String
+  startDate       DateTime
+  endDate         DateTime?
+  deliveryDays    String[]  // Array of delivery days
+  deliveryTime    String    // Preferred delivery time
+  specialRequests String?   // Any special dietary requirements or requests
+  status          String    // "active", "pending", "cancelled", "completed"
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  user            User      @relation(fields: [userId], references: [id])
+  mealPlan        MealPlan @relation(fields: [mealPlanId], references: [id])
+}
+
+model Testimonial {
+  id          String    @id @default(cuid())
+  userId      String
+  mealPlanId  String
+  rating      Int       // 1-5 stars
+  message     String
+  date        DateTime  @default(now())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id])
+  mealPlan    MealPlan @relation(fields: [mealPlanId], references: [id])
+} 
