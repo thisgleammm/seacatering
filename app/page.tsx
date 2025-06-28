@@ -2,15 +2,15 @@ import { Button } from "@heroui/button";
 import { Card, CardBody } from "@heroui/card";
 import { Link } from "@heroui/link";
 
+import { TestimonialsSection } from "@/components/testimonials";
 import { siteConfig } from "@/config/site";
-import { TestimonialsSection } from "../components/testimonials";
 
 export default function Home() {
   return (
-    <section className="flex flex-col items-center justify-center gap-6 sm:gap-8 py-4 sm:py-8 md:py-10 px-4 sm:px-6">
-      <div className="relative w-full max-w-5xl mx-auto overflow-hidden rounded-xl md:rounded-3xl">
-        <Card className="w-full h-[400px] sm:h-[450px] md:h-[500px] lg:h-[550px] border-none">
-          <CardBody className="relative p-0 overflow-hidden">
+    <section className="flex flex-col items-center justify-center gap-6 px-4 py-4 sm:gap-8 sm:px-6 sm:py-8 md:py-10">
+      <div className="relative mx-auto w-full max-w-5xl overflow-hidden rounded-xl md:rounded-3xl">
+        <Card className="h-[400px] w-full border-none sm:h-[450px] md:h-[500px] lg:h-[550px]">
+          <CardBody className="relative overflow-hidden p-0">
             <div
               className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat blur-sm brightness-60"
               style={{
@@ -18,24 +18,24 @@ export default function Home() {
                   "url('https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')",
               }}
             />
-            <div className="absolute inset-0 bg-black/50 z-10" />
+            <div className="absolute inset-0 z-10 bg-black/50" />
 
-            <div className="relative z-20 flex flex-col items-center justify-center h-full text-center px-4 sm:px-6 md:px-8">
-              <div className="max-w-4xl mx-auto">
-                <h1 className="uppercase text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-4 sm:mb-6 leading-tight">
+            <div className="relative z-20 flex h-full flex-col items-center justify-center px-4 text-center sm:px-6 md:px-8">
+              <div className="mx-auto max-w-4xl">
+                <h1 className="mb-4 text-3xl font-bold leading-tight text-white uppercase sm:mb-6 sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl">
                   {siteConfig.name}
                 </h1>
 
-                <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white/90 mb-6 sm:mb-8 font-medium px-2">
+                <p className="mb-6 px-2 text-lg font-medium text-white/90 sm:mb-8 sm:text-xl md:text-2xl lg:text-3xl">
                   {siteConfig.description}
                 </p>
 
                 <Button
                   as={Link}
-                  className="text-white font-semibold text-base sm:text-lg px-6 sm:px-8 py-4 sm:py-6 h-auto rounded-full shadow-lg transform hover:scale-105 hover:shadow-xl transition-all duration-200"
+                  className="h-auto transform rounded-full px-6 py-4 text-base font-semibold text-white shadow-lg transition-all duration-200 hover:scale-105 hover:shadow-xl sm:px-8 sm:py-6 sm:text-lg"
+                  color="primary"
                   href="/menu"
                   size="lg"
-                  color="primary"
                   variant="solid"
                 >
                   Order Now
@@ -46,11 +46,11 @@ export default function Home() {
         </Card>
       </div>
 
-      <div className="max-w-4xl mx-auto text-center mt-12 sm:mt-16 px-4">
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4 sm:mb-6">
+      <div className="mx-auto mt-12 max-w-4xl px-4 text-center sm:mt-16">
+        <h2 className="mb-4 text-2xl font-bold text-foreground sm:mb-6 sm:text-3xl md:text-4xl">
           Welcome to SEA Catering
         </h2>
-        <p className="text-base sm:text-lg text-default-600 mb-8 sm:mb-12 leading-relaxed">
+        <p className="mb-8 text-base leading-relaxed text-default-600 sm:mb-12 sm:text-lg">
           SEA Catering is a customizable healthy meal service that delivers
           across Indonesia. We provide high-nutrition meals with a focus on
           quality and health. Every dish is specially designed to support your
@@ -58,15 +58,15 @@ export default function Home() {
         </p>
       </div>
 
-      <div className="max-w-6xl mx-auto mt-12 sm:mt-16 px-4">
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-8 sm:mb-12 text-center">
+      <div className="mx-auto mt-12 max-w-6xl px-4 sm:mt-16">
+        <h2 className="mb-8 text-center text-2xl font-bold text-foreground sm:mb-12 sm:text-3xl md:text-4xl">
           Our Key Services
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          <Card className="p-6 hover:shadow-lg transition-shadow">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
+          <Card className="p-6 transition-shadow hover:shadow-lg">
             <CardBody className="text-center">
-              <div className="text-4xl mb-4">🍽️</div>
-              <h3 className="text-xl font-semibold mb-3">Menu Customization</h3>
+              <div className="mb-4 text-4xl">🍽️</div>
+              <h3 className="mb-3 text-xl font-semibold">Menu Customization</h3>
               <p className="text-default-600">
                 Customize your meals based on your dietary preferences and
                 personal nutritional needs.
@@ -74,10 +74,10 @@ export default function Home() {
             </CardBody>
           </Card>
 
-          <Card className="p-6 hover:shadow-lg transition-shadow">
+          <Card className="p-6 transition-shadow hover:shadow-lg">
             <CardBody className="text-center">
-              <div className="text-4xl mb-4">🇮🇩</div>
-              <h3 className="text-xl font-semibold mb-3">
+              <div className="mb-4 text-4xl">🇮🇩</div>
+              <h3 className="mb-3 text-xl font-semibold">
                 Nationwide Delivery
               </h3>
               <p className="text-default-600">
@@ -87,10 +87,10 @@ export default function Home() {
             </CardBody>
           </Card>
 
-          <Card className="p-6 hover:shadow-lg transition-shadow">
+          <Card className="p-6 transition-shadow hover:shadow-lg">
             <CardBody className="text-center">
-              <div className="text-4xl mb-4">📊</div>
-              <h3 className="text-xl font-semibold mb-3">
+              <div className="mb-4 text-4xl">📊</div>
+              <h3 className="mb-3 text-xl font-semibold">
                 Nutritional Information
               </h3>
               <p className="text-default-600">
@@ -100,10 +100,10 @@ export default function Home() {
             </CardBody>
           </Card>
 
-          <Card className="p-6 hover:shadow-lg transition-shadow">
+          <Card className="p-6 transition-shadow hover:shadow-lg">
             <CardBody className="text-center">
-              <div className="text-4xl mb-4">🥗</div>
-              <h3 className="text-xl font-semibold mb-3">Fresh Ingredients</h3>
+              <div className="mb-4 text-4xl">🥗</div>
+              <h3 className="mb-3 text-xl font-semibold">Fresh Ingredients</h3>
               <p className="text-default-600">
                 Using high-quality fresh ingredients from trusted local sources.
               </p>
