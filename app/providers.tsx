@@ -34,9 +34,7 @@ export function Providers({ children, themeProps }: ProvidersProps) {
     return (
       <SessionProvider>
         <HeroUIProvider navigate={router.push}>
-          <div suppressHydrationWarning>
-            {children}
-          </div>
+          <div suppressHydrationWarning>{children}</div>
         </HeroUIProvider>
       </SessionProvider>
     );
@@ -49,7 +47,6 @@ export function Providers({ children, themeProps }: ProvidersProps) {
           {...themeProps}
           enableSystem={false}
           forcedTheme="light"
-          suppressHydrationWarning
         >
           {children}
         </NextThemesProvider>
