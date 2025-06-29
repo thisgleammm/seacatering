@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import NextLink from "next/link";
 import clsx from "clsx";
@@ -31,6 +31,11 @@ export const Navbar = () => {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { data: session, status } = useSession();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleMenuItemClick = () => {
     setIsMenuOpen(false);
@@ -39,6 +44,30 @@ export const Navbar = () => {
   const handleSignOut = async () => {
     await signOut({ redirect: true, callbackUrl: "/" });
   };
+
+  // Prevent hydration mismatch by not rendering auth-dependent UI on server
+  if (!mounted) {
+    return (
+      <HeroUINavbar
+        className="fixed top-0 inset-x-0 h-16 z-50 backdrop-blur-sm backdrop-saturate-150 bg-background/70 border-b border-divider"
+        maxWidth="xl"
+        position="sticky"
+      >
+        <NavbarContent justify="start">
+          <NavbarBrand as="li" className="gap-3 max-w-fit">
+            <NextLink className="flex justify-start items-center gap-1" href="/">
+              <p className="font-bold text-inherit">SEA CATERING</p>
+            </NextLink>
+          </NavbarBrand>
+        </NavbarContent>
+        <NavbarContent justify="end">
+          <NavbarItem className="hidden lg:flex">
+            <div className="w-20 h-8 bg-gray-200 animate-pulse rounded"></div>
+          </NavbarItem>
+        </NavbarContent>
+      </HeroUINavbar>
+    );
+  }
 
   return (
     <HeroUINavbar

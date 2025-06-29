@@ -23,6 +23,24 @@ declare module "@react-types/shared" {
 
 export function Providers({ children, themeProps }: ProvidersProps) {
   const router = useRouter();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    // Render a basic layout during SSR to avoid hydration mismatches
+    return (
+      <SessionProvider>
+        <HeroUIProvider navigate={router.push}>
+          <div suppressHydrationWarning>
+            {children}
+          </div>
+        </HeroUIProvider>
+      </SessionProvider>
+    );
+  }
 
   return (
     <SessionProvider>
@@ -31,6 +49,7 @@ export function Providers({ children, themeProps }: ProvidersProps) {
           {...themeProps}
           enableSystem={false}
           forcedTheme="light"
+          suppressHydrationWarning
         >
           {children}
         </NextThemesProvider>

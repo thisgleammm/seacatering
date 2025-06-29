@@ -56,9 +56,16 @@ export const TestimonialsSection = () => {
   const [plans, setPlans] = useState<{ id: string; name: string }[]>([]);
   const [isPaused, setIsPaused] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
   const testimonialsToShow = 3;
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    
     const fetchData = async () => {
       try {
         const [testimonialsRes, plansRes] = await Promise.all([
@@ -101,7 +108,7 @@ export const TestimonialsSection = () => {
     };
 
     fetchData();
-  }, []);
+  }, [mounted]);
 
   useEffect(() => {
     const slideTimer = setInterval(() => {
@@ -184,7 +191,7 @@ export const TestimonialsSection = () => {
     ));
   };
 
-  if (isLoading) {
+  if (!mounted || isLoading) {
     return (
       <div className="py-16 bg-white">
         <div className="container mx-auto px-4 text-center">
