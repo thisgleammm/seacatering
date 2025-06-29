@@ -1,10 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
 import { Input, Textarea } from "@heroui/input";
 import Image from "next/image";
+import { Spinner } from "@heroui/spinner";
 
 import { PlanSkeletonGrid } from "@/components/plan-skeleton";
 
@@ -77,6 +80,14 @@ const getImageFromName = (name: string): string => {
 };
 
 export default function SubscribePage() {
+  const router = useRouter();
+  const { data: session, status } = useSession({
+    required: true,
+    onUnauthenticated() {
+      router.push("/auth/login?callbackUrl=/subscribe");
+    },
+  });
+
   const [formData, setFormData] = useState<FormData>({
     name: "",
     phone: "",
@@ -93,26 +104,44 @@ export default function SubscribePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
+  // Initialize form with user data when session is available
   useEffect(() => {
-    setIsLoading(true);
-    fetch("/api/meal-plans")
-      .then((res) => res.json())
-      .then((data) => {
-        const enhancedData = data.map((plan: MealPlan) => ({
-          ...plan,
-          category: getCategoryFromName(plan.name),
-          image: getImageFromName(plan.name),
-        }));
+    if (session?.user) {
+      setFormData((prev) => ({
+        ...prev,
+        name: session.user.name || "",
+      }));
+    }
+  }, [session]);
 
-        setPlans(enhancedData);
-      })
-      .catch(() => {
-        setErrors((prev) => ({ ...prev, api: "Failed to load meal plans" }));
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, []);
+  // Fetch meal plans
+  useEffect(() => {
+    // Move the conditional check inside the effect callback
+    if (status === "authenticated") {
+      setIsLoading(true);
+      fetch("/api/meal-plans")
+        .then((res) => res.json())
+        .then((data) => {
+          const enhancedData = data.map((plan: MealPlan) => ({
+            ...plan,
+            category: getCategoryFromName(plan.name),
+            image: getImageFromName(plan.name),
+          }));
+
+          setPlans(enhancedData);
+        })
+        .catch(() => {
+          setErrors((prev) => ({
+            ...prev,
+            api: "Failed to load meal plans",
+          }));
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    }
+    // The dependency array correctly ensures the effect runs when 'status' changes
+  }, [status]);
 
   useEffect(() => {
     if (
@@ -132,6 +161,22 @@ export default function SubscribePage() {
       setTotalPrice(0);
     }
   }, [formData.plan, formData.mealTypes, formData.deliveryDays, plans]);
+
+  // Show loading state while checking authentication
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Spinner className="mb-4" color="primary" size="lg" />
+          <p className="text-default-600">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (status !== "authenticated") {
+    return null;
+  }
 
   const validateForm = () => {
     const newErrors: Partial<FormData> = {};
@@ -168,9 +213,27 @@ export default function SubscribePage() {
     if (validateForm()) {
       setIsSubmitting(true);
       try {
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        const response = await fetch("/api/subscriptions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...formData,
+            userId: session?.user?.id,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to create subscription");
+        }
+
         setIsSuccess(true);
       } catch {
+        setErrors((prev) => ({
+          ...prev,
+          submit: "Failed to create subscription. Please try again.",
+        }));
       } finally {
         setIsSubmitting(false);
       }
