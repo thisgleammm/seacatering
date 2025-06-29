@@ -16,15 +16,19 @@ import { Avatar } from "@heroui/avatar";
 
 interface Testimonial {
   id: string;
-  user: {
-    name: string;
-  };
-  mealPlan: {
-    name: string;
-  };
-  message: string;
+  userId: string;
+  mealPlanId: string;
   rating: number;
+  message: string;
   date: string;
+  createdAt: string;
+  updatedAt: string;
+  user?: {
+    name: string;
+  };
+  mealPlan?: {
+    name: string;
+  };
 }
 
 interface FormData {
@@ -47,6 +51,7 @@ export const TestimonialsSection = () => {
   });
   const [plans, setPlans] = useState<{ id: string; name: string }[]>([]);
   const [isPaused, setIsPaused] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const testimonialsToShow = 3;
 
   useEffect(() => {
@@ -58,7 +63,14 @@ export const TestimonialsSection = () => {
         ]);
 
         if (!testimonialsRes.ok || !plansRes.ok) {
-          throw new Error("Failed to fetch data");
+          const testimonialsError = await testimonialsRes.json();
+          const plansError = await plansRes.json();
+
+          throw new Error(
+            testimonialsError.error ||
+              plansError.error ||
+              "Failed to fetch data",
+          );
         }
 
         const [testimonialsData, plansData] = await Promise.all([
@@ -66,10 +78,21 @@ export const TestimonialsSection = () => {
           plansRes.json(),
         ]);
 
-        setTestimonials(testimonialsData);
+        // Filter out testimonials with missing data
+        const validTestimonials = testimonialsData.filter(
+          (t: Testimonial) => t.user?.name && t.mealPlan?.name,
+        );
+
+        setTestimonials(validTestimonials);
         setPlans(plansData);
-      } catch {
-        setError("Failed to load testimonials. Please try again later.");
+      } catch (error) {
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Failed to load testimonials. Please try again later.",
+        );
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -133,7 +156,27 @@ export const TestimonialsSection = () => {
     ));
   };
 
-  if (testimonials.length === 0 && !error) {
+  if (isLoading) {
+    return (
+      <div className="py-16 bg-white">
+        <div className="container mx-auto px-4 text-center">
+          <div className="animate-pulse">Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (testimonials.length === 0) {
+    if (error) {
+      return (
+        <div className="py-16 bg-white">
+          <div className="container mx-auto px-4 text-center">
+            <div className="text-danger">{error}</div>
+          </div>
+        </div>
+      );
+    }
+
     return null;
   }
 
@@ -306,11 +349,11 @@ export const TestimonialsSection = () => {
                   <div className="flex items-center gap-3">
                     <Avatar
                       className="bg-[#8C0909] text-white w-10 h-10 text-base"
-                      name={testimonials[currentIndex].user.name}
+                      name={testimonials[currentIndex]?.user?.name}
                     />
                     <div className="flex flex-col">
                       <p className="font-semibold text-foreground text-base">
-                        {testimonials[currentIndex].user.name}
+                        {testimonials[currentIndex]?.user?.name}
                       </p>
                       <div className="flex items-center gap-2 mt-0.5">
                         <div className="flex text-xs">
@@ -320,6 +363,7 @@ export const TestimonialsSection = () => {
                           {new Date(
                             testimonials[currentIndex].date,
                           ).toLocaleDateString()}
+                          ,
                         </span>
                       </div>
                     </div>
@@ -331,7 +375,7 @@ export const TestimonialsSection = () => {
                   </p>
                   <div className="mt-3 pt-3 border-t border-divider">
                     <p className="text-xs text-[#8C0909] font-medium">
-                      Plan: {testimonials[currentIndex].mealPlan.name}
+                      Plan: {testimonials[currentIndex]?.mealPlan?.name}
                     </p>
                   </div>
                 </CardBody>
@@ -377,11 +421,11 @@ export const TestimonialsSection = () => {
                       <div className="flex items-center gap-4">
                         <Avatar
                           className="bg-[#8C0909] text-white w-12 h-12 text-lg"
-                          name={testimonial.user.name}
+                          name={testimonial.user?.name}
                         />
                         <div className="flex flex-col">
                           <p className="font-semibold text-foreground text-lg">
-                            {testimonial.user.name}
+                            {testimonial.user?.name}
                           </p>
                           <div className="flex items-center gap-2 mt-1">
                             <div className="flex text-sm">
@@ -400,7 +444,7 @@ export const TestimonialsSection = () => {
                       </p>
                       <div className="mt-4 pt-4 border-t border-divider">
                         <p className="text-small text-[#8C0909] font-medium">
-                          Plan: {testimonial.mealPlan.name}
+                          Plan: {testimonial.mealPlan?.name}
                         </p>
                       </div>
                     </CardBody>
