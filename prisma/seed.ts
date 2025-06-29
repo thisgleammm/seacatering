@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import * as bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
@@ -105,41 +106,102 @@ async function main() {
     mealPlans.map((plan) => prisma.mealPlan.create({ data: plan }))
   );
 
+  // Create default password hash
+  const defaultPassword = await bcrypt.hash("password123", 10);
+
   const users = [
     {
       name: "Sarah Johnson",
       email: "sarah.johnson@example.com",
       phone: "0812345678",
+      password: defaultPassword,
+      role: "USER" as const,
+      emailVerified: new Date(),
+      address: "123 Main St, Jakarta",
     },
     {
       name: "Michael Chen",
       email: "michael.chen@example.com",
       phone: "0823456789",
+      password: defaultPassword,
+      role: "USER" as const,
+      emailVerified: new Date(),
+      address: "456 Oak Ave, Surabaya",
     },
     {
       name: "Amanda Rodriguez",
       email: "amanda.rodriguez@example.com",
       phone: "0834567890",
+      password: defaultPassword,
+      role: "USER" as const,
+      emailVerified: new Date(),
+      address: "789 Pine Rd, Bandung",
     },
     {
       name: "David Kim",
       email: "david.kim@example.com",
       phone: "0845678901",
+      password: defaultPassword,
+      role: "USER" as const,
+      emailVerified: new Date(),
+      address: "321 Elm St, Medan",
     },
     {
       name: "Lisa Thompson",
       email: "lisa.thompson@example.com",
       phone: "0856789012",
+      password: defaultPassword,
+      role: "USER" as const,
+      emailVerified: new Date(),
+      address: "654 Maple Dr, Semarang",
     },
     {
-      name: "Robert Green",
-      email: "robert.green@example.com",
+      name: "Admin User",
+      email: "admin@seacatering.com",
       phone: "0867890123",
+      password: defaultPassword,
+      role: "ADMIN" as const,
+      emailVerified: new Date(),
+      address: "987 Admin St, Jakarta",
     },
   ];
 
   const createdUsers = await Promise.all(
     users.map((user) => prisma.user.create({ data: user }))
+  );
+
+  // Create subscriptions
+  const subscriptions = [
+    {
+      userId: createdUsers[0].id,
+      planId: createdMealPlans[0].id,
+      mealTypes: ["breakfast", "lunch", "dinner"],
+      deliveryDays: ["Monday", "Wednesday", "Friday"],
+      allergies: "None",
+      status: "ACTIVE" as const,
+    },
+    {
+      userId: createdUsers[1].id,
+      planId: createdMealPlans[1].id,
+      mealTypes: ["breakfast", "lunch"],
+      deliveryDays: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+      allergies: "Shellfish",
+      status: "ACTIVE" as const,
+    },
+    {
+      userId: createdUsers[2].id,
+      planId: createdMealPlans[2].id,
+      mealTypes: ["lunch", "dinner"],
+      deliveryDays: ["Tuesday", "Thursday"],
+      allergies: "Nuts",
+      status: "PAUSED" as const,
+    },
+  ];
+
+  await Promise.all(
+    subscriptions.map((subscription) =>
+      prisma.subscription.create({ data: subscription })
+    )
   );
 
   const testimonials = [

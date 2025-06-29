@@ -7,57 +7,106 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
 model User {
   id            String         @id @default(cuid())
   name          String
-  email         String        @unique
+  email         String         @unique
   phone         String?
   address       String?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  emailVerified DateTime?
+  image         String?
+  role          Role           @default(USER)
+  password      String
+  accounts      Account[]
+  sessions      Session[]
   subscriptions Subscription[]
   testimonials  Testimonial[]
 }
 
 model MealPlan {
-  id           String         @id @default(cuid())
-  name         String
-  description  String
-  price        Float
-  calories     Int
-  duration     String        // e.g., "1 day", "30 days"
-  features     String[]      // Array of features/benefits
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  id            String         @id @default(cuid())
+  name          String
+  description   String
+  price         Float
+  calories      Int
+  duration      String
+  features      String[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   subscriptions Subscription[]
   testimonials  Testimonial[]
 }
 
 model Subscription {
-  id              String    @id @default(cuid())
-  userId          String
-  mealPlanId      String
-  startDate       DateTime
-  endDate         DateTime?
-  deliveryDays    String[]  // Array of delivery days
-  deliveryTime    String    // Preferred delivery time
-  specialRequests String?   // Any special dietary requirements or requests
-  status          String    // "active", "pending", "cancelled", "completed"
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  user            User      @relation(fields: [userId], references: [id])
-  mealPlan        MealPlan @relation(fields: [mealPlanId], references: [id])
+  id           String             @id @default(cuid())
+  userId       String
+  deliveryDays String[]
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  allergies    String?
+  mealTypes    String[]
+  planId       String
+  status       SubscriptionStatus @default(ACTIVE)
+  mealPlan     MealPlan           @relation(fields: [planId], references: [id])
+  user         User               @relation(fields: [userId], references: [id])
 }
 
 model Testimonial {
-  id          String    @id @default(cuid())
-  userId      String
-  mealPlanId  String
-  rating      Int       // 1-5 stars
-  message     String
-  date        DateTime  @default(now())
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  user        User      @relation(fields: [userId], references: [id])
-  mealPlan    MealPlan @relation(fields: [mealPlanId], references: [id])
-} 
+  id         String   @id @default(cuid())
+  userId     String
+  mealPlanId String
+  rating     Int
+  message    String
+  date       DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  mealPlan   MealPlan @relation(fields: [mealPlanId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAUSED
+  CANCELLED
+}
