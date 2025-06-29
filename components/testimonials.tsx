@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 import { Button } from "@heroui/button";
-import { Input, Textarea } from "@heroui/input";
+import { Textarea } from "@heroui/input";
 import {
   Modal,
   ModalContent,
@@ -42,7 +42,7 @@ interface FormData {
 
 export const TestimonialsSection = () => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const router = useRouter();
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -65,29 +65,24 @@ export const TestimonialsSection = () => {
 
   useEffect(() => {
     if (!mounted) return;
-    
+
     const fetchData = async () => {
       try {
+        // Fetch both testimonials and meal plans (both are public now)
         const [testimonialsRes, plansRes] = await Promise.all([
           fetch("/api/testimonials"),
           fetch("/api/meal-plans"),
         ]);
 
-        if (!testimonialsRes.ok || !plansRes.ok) {
+        if (!testimonialsRes.ok) {
           const testimonialsError = await testimonialsRes.json();
-          const plansError = await plansRes.json();
 
           throw new Error(
-            testimonialsError.error ||
-              plansError.error ||
-              "Failed to fetch data",
+            testimonialsError.error || "Failed to fetch testimonials",
           );
         }
 
-        const [testimonialsData, plansData] = await Promise.all([
-          testimonialsRes.json(),
-          plansRes.json(),
-        ]);
+        const testimonialsData = await testimonialsRes.json();
 
         // Filter out testimonials with missing data
         const validTestimonials = testimonialsData.filter(
@@ -95,7 +90,13 @@ export const TestimonialsSection = () => {
         );
 
         setTestimonials(validTestimonials);
-        setPlans(plansData);
+
+        // Set meal plans if available
+        if (plansRes.ok) {
+          const plansData = await plansRes.json();
+
+          setPlans(plansData);
+        }
       } catch (error) {
         setError(
           error instanceof Error
@@ -127,6 +128,7 @@ export const TestimonialsSection = () => {
   const handleSubmit = async (onClose: () => void) => {
     if (!session) {
       setError("You must be logged in to submit a testimonial.");
+
       return;
     }
 
@@ -137,6 +139,7 @@ export const TestimonialsSection = () => {
       if (!formData.message.trim() || !formData.plan) {
         setError("Please fill in all required fields.");
         setIsSubmitting(false);
+
         return;
       }
 
@@ -150,6 +153,7 @@ export const TestimonialsSection = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
+
         throw new Error(errorData.error || "Failed to submit testimonial");
       }
 
@@ -162,9 +166,9 @@ export const TestimonialsSection = () => {
       onClose();
     } catch (error) {
       setError(
-        error instanceof Error 
-          ? error.message 
-          : "Failed to submit testimonial. Please try again."
+        error instanceof Error
+          ? error.message
+          : "Failed to submit testimonial. Please try again.",
       );
     } finally {
       setIsSubmitting(false);
@@ -173,7 +177,11 @@ export const TestimonialsSection = () => {
 
   const handleShareExperience = () => {
     if (!session) {
-      router.push("/auth/login?callbackUrl=" + encodeURIComponent(window.location.pathname));
+      router.push(
+        "/auth/login?callbackUrl=" +
+          encodeURIComponent(window.location.pathname),
+      );
+
       return;
     }
     onOpen();
@@ -251,7 +259,10 @@ export const TestimonialsSection = () => {
                     {session ? (
                       <div className="space-y-4">
                         <div className="text-sm text-default-600 mb-4">
-                          Posting as: <span className="font-semibold">{session.user?.name}</span>
+                          Posting as:{" "}
+                          <span className="font-semibold">
+                            {session.user?.name}
+                          </span>
                         </div>
 
                         <div>
@@ -267,6 +278,7 @@ export const TestimonialsSection = () => {
                             selectedKeys={formData.plan ? [formData.plan] : []}
                             onSelectionChange={(keys) => {
                               const selectedKey = Array.from(keys)[0] as string;
+
                               setFormData((prev) => ({
                                 ...prev,
                                 plan: selectedKey || "",
@@ -274,9 +286,7 @@ export const TestimonialsSection = () => {
                             }}
                           >
                             {plans.map((plan) => (
-                              <SelectItem key={plan.id} value={plan.id}>
-                                {plan.name}
-                              </SelectItem>
+                              <SelectItem key={plan.id}>{plan.name}</SelectItem>
                             ))}
                           </Select>
                         </div>
@@ -470,7 +480,9 @@ export const TestimonialsSection = () => {
                                   {renderStars(testimonial.rating)}
                                 </div>
                                 <span className="text-small text-default-500">
-                                  {new Date(testimonial.date).toLocaleDateString()}
+                                  {new Date(
+                                    testimonial.date,
+                                  ).toLocaleDateString()}
                                 </span>
                               </div>
                             </div>
@@ -522,7 +534,9 @@ export const TestimonialsSection = () => {
                 variant="flat"
                 onPress={handleShareExperience}
               >
-                {session ? "Share Your Experience" : "Login to Share Experience"}
+                {session
+                  ? "Share Your Experience"
+                  : "Login to Share Experience"}
               </Button>
             </div>
           )}
