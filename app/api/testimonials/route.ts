@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
 
+import { authOptions } from "@/lib/authOptions";
 import prisma from "@/lib/prisma";
 
 export async function GET() {
@@ -23,12 +25,9 @@ export async function GET() {
     });
 
     return NextResponse.json(testimonials);
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error";
-
+  } catch {
     return NextResponse.json(
-      { error: "Failed to fetch testimonials", details: errorMessage },
+      { error: "Failed to fetch testimonials" },
       { status: 500 },
     );
   }
@@ -36,29 +35,41 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { name, message, rating, plan } = body;
+    const session = await getServerSession(authOptions);
 
-    if (!name || !message || !rating || !plan) {
+    if (!session) {
+      return NextResponse.json(
+        { error: "You must be logged in to submit a testimonial" },
+        { status: 401 },
+      );
+    }
+
+    const body = await request.json();
+    const { message, rating, plan } = body;
+
+    if (!message || !rating || !plan) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 },
       );
     }
 
-    // Create or find user
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email: `${name.toLowerCase().replace(/\s+/g, ".")}@example.com`, // Temporary email
-        phone: null,
-      },
+    // Verify meal plan exists
+    const mealPlan = await prisma.mealPlan.findUnique({
+      where: { id: plan },
     });
 
-    // Create testimonial
+    if (!mealPlan) {
+      return NextResponse.json(
+        { error: "Invalid meal plan selected" },
+        { status: 400 },
+      );
+    }
+
+    // Create testimonial using the authenticated user
     const testimonial = await prisma.testimonial.create({
       data: {
-        userId: user.id,
+        userId: session.user.id,
         mealPlanId: plan,
         rating,
         message,
@@ -79,12 +90,9 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(testimonial);
-  } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error";
-
+  } catch {
     return NextResponse.json(
-      { error: "Failed to create testimonial", details: errorMessage },
+      { error: "Failed to create testimonial" },
       { status: 500 },
     );
   }
