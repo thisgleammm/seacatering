@@ -55,14 +55,17 @@ export const Navbar = () => {
       >
         <NavbarContent justify="start">
           <NavbarBrand as="li" className="gap-3 max-w-fit">
-            <NextLink className="flex justify-start items-center gap-1" href="/">
+            <NextLink
+              className="flex justify-start items-center gap-1"
+              href="/"
+            >
               <p className="font-bold text-inherit">SEA CATERING</p>
             </NextLink>
           </NavbarBrand>
         </NavbarContent>
         <NavbarContent justify="end">
           <NavbarItem className="hidden lg:flex">
-            <div className="w-20 h-8 bg-gray-200 animate-pulse rounded"></div>
+            <div className="w-20 h-8 bg-gray-200 animate-pulse rounded" />
           </NavbarItem>
         </NavbarContent>
       </HeroUINavbar>
