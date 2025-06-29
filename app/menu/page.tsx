@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardBody } from "@heroui/card";
 import { Button } from "@heroui/button";
 import {
@@ -37,11 +38,16 @@ interface MealPlan {
 }
 
 export default function Menu() {
+  const router = useRouter();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [selectedPlan, setSelectedPlan] = useState<MealPlan | null>(null);
   const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const handleSubscribe = () => {
+    router.push("/subscribe");
+  };
 
   useEffect(() => {
     setIsLoading(true);
@@ -460,7 +466,12 @@ export default function Menu() {
                 </ModalBody>
 
                 <ModalFooter>
-                  <Button className="w-full" color="primary" size="lg">
+                  <Button
+                    className="w-full"
+                    color="primary"
+                    size="lg"
+                    onPress={handleSubscribe}
+                  >
                     Subscribe - Rp{selectedPlan.price.toLocaleString("id-ID")}
                     /day
                   </Button>
